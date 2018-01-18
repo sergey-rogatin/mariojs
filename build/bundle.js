@@ -77,39 +77,57 @@ const ctx = canvas.getContext('2d');
 canvas.width = 600;
 canvas.height = 400;
 
-const REMOVED_ENTITY = {};
+const entities = __WEBPACK_IMPORTED_MODULE_0__utils__["a" /* default */].unorderedList();
 
-const entities = {
-  items: [],
-  freeSpaces: [],
+const settings = {
+  pixelsPerMeter: 32,
+  tileSize: 1,
+  timeSpeed: 1,
+  gravity: 0.7,
 };
 
+const time = {
+  deltaTime: 0,
+  totalTime: 0,
+};
+
+
 function addEntity(type) {
-  let index = entities.items.length;
-  if (entities.freeSpaces.length) {
-    index = entities.freeSpaces.pop();
-  }
   const entity = {
     x: 0,
     y: 0,
-    velocityX: 0,
-    velocityY: 0,
+    bbox: {
+      left: 0,
+      top: 0,
+      width: 0,
+      height: 0,
+    },
+    speedX: 0,
+    speedY: 0,
+
     type,
-    index,
+    index: 0,
+    collisionIndex: 0,
   };
-  entities.items[index] = entity;
+
+  const typeInfo = entityTypes[type];
+  Object.assign(entity, typeInfo.defaultState);
+
+  const index = entities.add(entity);
+  entity.index = index;
+
+  const collisionIndex = typeInfo.collisionList.add(entity);
+  entity.collisionIndex = collisionIndex;
+
   return entity;
 }
 
 function destroyEntity(entity) {
-  entities.freeSpaces.push(entity.index);
-  entities.items[entity.index] = REMOVED_ENTITY;
-}
+  entities.remove(entity.index);
 
-const time = {
-  speed: 1,
-  deltaTime: 0,
-};
+  const typeInfo = entityTypes[entity.type];
+  typeInfo.collisionList.remove(entity.collisionIndex);
+}
 
 const keyCode = {
   SPACE: 32,
@@ -147,15 +165,20 @@ document.onkeyup = function (event) {
 };
 
 const entityTypes = [];
+const dictSymbolToEntityType = {};
 
-function addEntityType(mapSymbol, updateFunc) {
+function addEntityType(mapSymbol, updateFunc, defaultState = {}) {
   const type = entityTypes.length;
   entityTypes.push({
-    mapSymbol,
     updateFunc,
+    collisionList: __WEBPACK_IMPORTED_MODULE_0__utils__["a" /* default */].unorderedList(),
+    defaultState,
   });
+  dictSymbolToEntityType[mapSymbol] = type;
   return type;
 }
+
+let prevTime = performance.now();
 
 function updateGame() {
   ctx.fillStyle = 'black';
@@ -163,7 +186,7 @@ function updateGame() {
 
   for (let index = 0; index < entities.items.length; index++) {
     const entity = entities.items[index];
-    if (entity !== REMOVED_ENTITY) {
+    if (entity !== __WEBPACK_IMPORTED_MODULE_0__utils__["a" /* default */].unorderedList.REMOVED_ITEM) {
       const typeInfo = entityTypes[entity.type];
       if (typeInfo.updateFunc) {
         typeInfo.updateFunc(entity);
@@ -177,18 +200,185 @@ function updateGame() {
     key.wentUp = false;
   });
 
+
+  const newTime = performance.now();
+  time.deltaTime = (newTime - prevTime) * 0.001;
+  time.totalTime += time.deltaTime;
+  prevTime = newTime;
   requestAnimationFrame(updateGame);
 }
 
-addEntity();
+function drawRect(x, y, width, height, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x * settings.pixelsPerMeter,
+    y * settings.pixelsPerMeter,
+    width * settings.pixelsPerMeter,
+    height * settings.pixelsPerMeter);
+}
+
+function createMap(asciiMapRows) {
+  for (let y = 0; y < asciiMapRows.length; y++) {
+    const row = asciiMapRows[y];
+    for (let x = 0; x < row.length; x++) {
+      const entityType = dictSymbolToEntityType[row[x]];
+      if (entityType !== undefined) {
+        const e = addEntity(entityType);
+        e.x = x * settings.tileSize;
+        e.y = y * settings.tileSize;
+      }
+    }
+  }
+}
+
+function checkCollision(entity, otherEntityType, offsetX = 0, offetY = 0) {
+  const typeInfo = entityTypes[otherEntityType];
+  for (let other of typeInfo.collisionList.items) {
+    if (other !== __WEBPACK_IMPORTED_MODULE_0__utils__["a" /* default */].unorderedList.REMOVED_ITEM && entity !== other) {
+      const eLeft = entity.x + offsetX + entity.bbox.left;
+      const eTop = entity.y + offetY + entity.bbox.top;
+      const eRight = eLeft + entity.bbox.width;
+      const eBottom = eTop + entity.bbox.height;
+
+      const oLeft = other.x + other.bbox.left;
+      const oTop = other.y + other.bbox.top;
+      const oRight = oLeft + other.bbox.width;
+      const oBottom = oTop + other.bbox.height;
+
+      const eps = 0;
+
+      if (
+        eLeft >= oRight - eps ||
+        eRight <= oLeft + eps ||
+        eTop >= oBottom - eps ||
+        eBottom <= oTop + eps
+      ) {
+        continue;
+      }
+
+      return other;
+    }
+  }
+  return null;
+}
+
+function moveAndCheckForObstacles(entity, obstacleEntityType) {
+  let isOnGround = false;
+
+  const horizWall = checkCollision(entity, obstacleEntityType, entity.speedX * time.deltaTime, 0);
+  if (horizWall) {
+    if (entity.speedX > 0) {
+      entity.x = horizWall.x + horizWall.bbox.left - entity.bbox.width + entity.bbox.left;
+    } else {
+      entity.x = horizWall.x + horizWall.bbox.width;
+    }
+    entity.speedX = 0;
+  }
+
+  const vertWall = checkCollision(entity, obstacleEntityType, entity.speedX * time.deltaTime, entity.speedY * time.deltaTime);
+  if (vertWall) {
+    if (entity.speedY > 0) {
+      entity.y = vertWall.y + vertWall.bbox.top - entity.bbox.height + entity.bbox.top;
+      isOnGround = true;
+      entity.speedY = 0;
+    } else {
+      entity.y = vertWall.y + vertWall.bbox.height;
+      entity.speedY *= -0.5;
+    }
+  }
+
+  entity.x += entity.speedX * time.deltaTime;
+  entity.y += entity.speedY * time.deltaTime;
+
+  return isOnGround;
+}
+
+
+// test code
+
 updateGame();
+
+function updateWall(wall) {
+  drawRect(wall.x, wall.y, settings.tileSize, settings.tileSize, 'lawngreen');
+}
+
+const ENTITY_TYPE_WALL = addEntityType('#', updateWall, {
+  bbox: {
+    left: 0,
+    top: 0,
+    width: settings.tileSize,
+    height: settings.tileSize,
+  },
+});
+
+function updateMario(mario) {
+  const keyLeft = keys[keyCode.ARROW_LEFT];
+  const keyRight = keys[keyCode.ARROW_RIGHT];
+  const keyUp = keys[keyCode.ARROW_UP];
+  const keyDown = keys[keyCode.ARROW_DOWN];
+  const keySpace = keys[keyCode.SPACE];
+
+
+  const metersPerSecondSq = 2.4;
+  const friction = 0.80;
+
+  const accelX = (keyRight.isDown - keyLeft.isDown) * metersPerSecondSq;
+
+  mario.speedX += accelX;
+  mario.speedY += settings.gravity;
+  mario.speedX *= friction;
+
+  const isOnGround = moveAndCheckForObstacles(mario, ENTITY_TYPE_WALL);
+
+  if (keySpace.wentDown && isOnGround) {
+    mario.speedY = -20;
+  }
+
+  drawRect(mario.x + mario.bbox.left,
+    mario.y + mario.bbox.top,
+    mario.bbox.width,
+    mario.bbox.height,
+    'yellow');
+}
+
+const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
+  bbox: {
+    left: 0,
+    top: 0,
+    width: settings.tileSize / 2,
+    height: settings.tileSize / 2,
+  },
+});
+
+const asciiMapRows = [
+  ' # ##########      ',
+  '                   ',
+  '      ###          ',
+  '##  #####      ####',
+  '#                  ',
+  '        #          ',
+  '#         ###      ',
+  '#                  ',
+  '                   ',
+  '#        ####      ',
+  '#   @              ',
+  '######      ###### ',
+];
+
+createMap(asciiMapRows);
+
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   addEntityType,
   keys,
   keyCode,
   destroyEntity,
+  addEntity,
+  createMap,
+  settings,
+  moveAndCheckForObstacles,
+  checkCollision,
 });
+
 
 /***/ }),
 /* 1 */
@@ -206,10 +396,30 @@ function median(a, b, c) {
 }
 
 
-/* unused harmony default export */ var _unused_webpack_default_export = ({
-  median,
-});
+function unorderedList() {
+  return {
+    items: [],
+    freeSpaces: [],
+    add(value) {
+      let index = this.items.length;
+      if (this.freeSpaces.length) {
+        index = this.freeSpaces.pop();
+      }
+      this.items[index] = value;
+      return index;
+    },
+    remove(index) {
+      this.freeSpaces.push(index);
+      this.items[index] = unorderedList.REMOVED_ITEM;
+    }
+  };
+}
+unorderedList.REMOVED_ITEM = Symbol('REMOVED_ITEM');
 
+/* harmony default export */ __webpack_exports__["a"] = ({
+  median,
+  unorderedList,
+});
 
 /***/ })
 /******/ ]);

@@ -8,6 +8,7 @@ let {
   destroyEntity,
   keys,
   keyCode,
+  addEntity,
 } = engine;
 
 let ENTITY_TYPE_MARIO = addEntityType('@', updateMario);
@@ -22,7 +23,7 @@ let map = `
 #                           #          
 #     #                     #          
 # @   #                     #          
-#######################################`;
+###################  ##################`;
 
 createMap(map);
 
@@ -33,7 +34,7 @@ function updateMario(mario) {
     mario.speedX += 1;
   }
 
-  moveEntity(mario, mario.speedX, mario.speedY);
+  moveAndCheckForObstacles(mario, ENTITY_TYPE_WALL);
 
   let hitEnemy = checkCollision(mario, ENTITY_TYPE_GOOMBA);
   if (hitEnemy) {
