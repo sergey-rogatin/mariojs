@@ -1,3 +1,5 @@
 # gameLecture
 npm i <br/>
-npm start
+npm start <br/>
+<br />
+Открыть build/index.html
