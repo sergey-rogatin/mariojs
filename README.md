@@ -1,5 +1,6 @@
 # gameLecture
-npm i <br/>
+
+npm install <br/>
 npm start <br/>
 <br />
-Открыть build/index.html
+Открыть http://localhost:1234
