@@ -206,17 +206,9 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
   );
   if (horizWall) {
     if (entity.speedX > 0) {
-      entity.x =
-        horizWall.x +
-        horizWall.bbox.left -
-        entity.bbox.width -
-        entity.bbox.left;
+      entity.x = horizWall.x + horizWall.bbox.left - entity.bbox.left - entity.bbox.width;
     } else {
-      entity.x =
-        horizWall.x +
-        horizWall.bbox.width -
-        entity.bbox.left +
-        horizWall.bbox.left;
+      entity.x = horizWall.x + horizWall.bbox.left + horizWall.bbox.width - entity.bbox.left;
     }
     entity.speedX = 0;
   }
@@ -229,13 +221,11 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
   );
   if (vertWall) {
     if (entity.speedY > 0) {
-      entity.y =
-        vertWall.y + vertWall.bbox.top - entity.bbox.height - entity.bbox.top;
+      entity.y = vertWall.y + vertWall.bbox.left - entity.bbox.top - entity.bbox.height;
       isOnGround = true;
       entity.speedY = 0;
     } else {
-      entity.y =
-        vertWall.y + vertWall.bbox.height - entity.bbox.top + vertWall.bbox.top;
+      entity.y = vertWall.y + vertWall.bbox.top + vertWall.bbox.height - entity.bbox.top;
       //entity.speedY *= -0.5;
       entity.speedY = 0;
     }
@@ -306,7 +296,7 @@ function updateMario(mario) {
 const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
   bbox: {
     left: -0.2,
-    top: -0.2,
+    top: -2,
     width: 0.4,
     height: 0.6
   }
