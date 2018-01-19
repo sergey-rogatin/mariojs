@@ -4,8 +4,8 @@
  * @param {number} b
  * @param {number} c
  */
-function median(a, b, c) {
-  return a > b ? (c > a ? a : b > c ? b : c) : c > b ? b : a > c ? a : c;
+function averageOfThree(a, b, c) {
+  return a > b === a < c ? a : b > a === b < c ? b : c;
 }
 
 function unorderedList() {
@@ -29,6 +29,6 @@ function unorderedList() {
 unorderedList.REMOVED_ITEM = Symbol('REMOVED_ITEM');
 
 export default {
-  median,
+  averageOfThree,
   unorderedList
 };
