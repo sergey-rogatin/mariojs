@@ -130,7 +130,6 @@ function updateGame() {
     key.wentUp = false;
   });
 
-
   const newTime = performance.now();
   time.deltaTime = (newTime - prevTime) * 0.001 * settings.timeSpeed;
   if (time.deltaTime > 0.1) {
@@ -198,9 +197,9 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
   const horizWall = checkCollision(entity, obstacleEntityType, entity.speedX * time.deltaTime, 0);
   if (horizWall) {
     if (entity.speedX > 0) {
-      entity.x = horizWall.x + horizWall.bbox.left - entity.bbox.width + entity.bbox.left;
+      entity.x = horizWall.x + horizWall.bbox.left - entity.bbox.width - entity.bbox.left;
     } else {
-      entity.x = horizWall.x + horizWall.bbox.width;
+      entity.x = horizWall.x + horizWall.bbox.width - entity.bbox.left + horizWall.bbox.left;
     }
     entity.speedX = 0;
   }
@@ -208,12 +207,13 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
   const vertWall = checkCollision(entity, obstacleEntityType, entity.speedX * time.deltaTime, entity.speedY * time.deltaTime);
   if (vertWall) {
     if (entity.speedY > 0) {
-      entity.y = vertWall.y + vertWall.bbox.top - entity.bbox.height + entity.bbox.top;
+      entity.y = vertWall.y + vertWall.bbox.top - entity.bbox.height - entity.bbox.top;
       isOnGround = true;
       entity.speedY = 0;
     } else {
-      entity.y = vertWall.y + vertWall.bbox.height;
-      entity.speedY *= -0.5;
+      entity.y = vertWall.y + vertWall.bbox.height - entity.bbox.top + vertWall.bbox.top;
+      //entity.speedY *= -0.5;
+      entity.speedY = 0;
     }
   }
 
@@ -229,7 +229,11 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
 updateGame();
 
 function updateWall(wall) {
-  drawRect(wall.x, wall.y, settings.tileSize, settings.tileSize, 'lawngreen');
+  drawRect(wall.x + wall.bbox.left,
+    wall.y + wall.bbox.top,
+    wall.bbox.width,
+    wall.bbox.height,
+    'lawngreen');
 }
 
 const ENTITY_TYPE_WALL = addEntityType('#', updateWall, {
@@ -253,10 +257,12 @@ function updateMario(mario) {
   const friction = 10;
 
   const accelX = (keyRight.isDown - keyLeft.isDown) * metersPerSecondSq;
+  const accelY = (keyDown.isDown - keyUp.isDown) * metersPerSecondSq;
 
   mario.speedX += accelX * time.deltaTime;
-  mario.speedY += settings.gravity * time.deltaTime;
+  mario.speedY += accelY * time.deltaTime;//settings.gravity * time.deltaTime;
   mario.speedX *= 1 - friction * time.deltaTime;
+  mario.speedY *= 1 - friction * time.deltaTime;
 
   const isOnGround = moveAndCheckForObstacles(mario, ENTITY_TYPE_WALL);
 
@@ -273,26 +279,26 @@ function updateMario(mario) {
 
 const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
   bbox: {
-    left: 0,
-    top: 0,
-    width: settings.tileSize / 2,
-    height: settings.tileSize / 2,
+    left: -0.2,
+    top: -0.2,
+    width: 0.4,
+    height: 0.6,
   },
 });
 
 const asciiMapRows = [
-  ' # ##########      ',
-  '                   ',
-  '      ###          ',
-  '##  #####      ####',
-  '#                  ',
-  '        #          ',
-  '#         ###      ',
-  '#                  ',
-  '                   ',
-  '#        ####      ',
-  '#   @              ',
-  '######      ###### ',
+  ' # ##########        ',
+  '                     ',
+  '      ###            ',
+  '##  #####      ####  ',
+  '#                    ',
+  '        #            ',
+  '#         ###        ',
+  '#                    ',
+  '                     ',
+  '#        ####        ',
+  '#   @                ',
+  '######      ######   ',
 ];
 
 createMap(asciiMapRows);
