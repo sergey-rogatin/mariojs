@@ -2,22 +2,24 @@ import utils from './utils';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
-canvas.width = 600;
-canvas.height = 400;
+canvas.width = 1366;
+canvas.height = 768;
 
 const entities = utils.unorderedList();
 
 const settings = {
-  pixelsPerMeter: 32,
+  pixelsPerMeter: 64,
   tileSize: 1,
   timeSpeed: 1,
-  gravity: 0.7,
+  gravity: 20,
 };
 
 const time = {
   deltaTime: 0,
   totalTime: 0,
 };
+
+window.settings = settings;
 
 
 function addEntity(type) {
@@ -130,7 +132,10 @@ function updateGame() {
 
 
   const newTime = performance.now();
-  time.deltaTime = (newTime - prevTime) * 0.001;
+  time.deltaTime = (newTime - prevTime) * 0.001 * settings.timeSpeed;
+  if (time.deltaTime > 0.1) {
+    time.deltaTime = 0.016;
+  }
   time.totalTime += time.deltaTime;
   prevTime = newTime;
   requestAnimationFrame(updateGame);
@@ -172,13 +177,11 @@ function checkCollision(entity, otherEntityType, offsetX = 0, offetY = 0) {
       const oRight = oLeft + other.bbox.width;
       const oBottom = oTop + other.bbox.height;
 
-      const eps = 0;
-
       if (
-        eLeft >= oRight - eps ||
-        eRight <= oLeft + eps ||
-        eTop >= oBottom - eps ||
-        eBottom <= oTop + eps
+        eLeft >= oRight ||
+        eRight <= oLeft ||
+        eTop >= oBottom ||
+        eBottom <= oTop
       ) {
         continue;
       }
@@ -246,19 +249,19 @@ function updateMario(mario) {
   const keySpace = keys[keyCode.SPACE];
 
 
-  const metersPerSecondSq = 2.4;
-  const friction = 0.80;
+  const metersPerSecondSq = 60;
+  const friction = 10;
 
   const accelX = (keyRight.isDown - keyLeft.isDown) * metersPerSecondSq;
 
-  mario.speedX += accelX;
-  mario.speedY += settings.gravity;
-  mario.speedX *= friction;
+  mario.speedX += accelX * time.deltaTime;
+  mario.speedY += settings.gravity * time.deltaTime;
+  mario.speedX *= 1 - friction * time.deltaTime;
 
   const isOnGround = moveAndCheckForObstacles(mario, ENTITY_TYPE_WALL);
 
   if (keySpace.wentDown && isOnGround) {
-    mario.speedY = -20;
+    mario.speedY = -12;
   }
 
   drawRect(mario.x + mario.bbox.left,
