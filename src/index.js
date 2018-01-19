@@ -180,11 +180,13 @@ function checkCollision(entity, otherEntityType, offsetX = 0, offetY = 0) {
       const oRight = oLeft + other.bbox.width;
       const oBottom = oTop + other.bbox.height;
 
+      const eps = 0.0001;
+
       if (
-        eLeft >= oRight ||
-        eRight <= oLeft ||
-        eTop >= oBottom ||
-        eBottom <= oTop
+        eLeft >= oRight - eps ||
+        eRight <= oLeft + eps ||
+        eTop >= oBottom - eps ||
+        eBottom <= oTop + eps
       ) {
         continue;
       }
@@ -221,12 +223,11 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
   );
   if (vertWall) {
     if (entity.speedY > 0) {
-      entity.y = vertWall.y + vertWall.bbox.left - entity.bbox.top - entity.bbox.height;
+      entity.y = vertWall.y + vertWall.bbox.top - entity.bbox.top - entity.bbox.height;
       isOnGround = true;
       entity.speedY = 0;
     } else {
       entity.y = vertWall.y + vertWall.bbox.top + vertWall.bbox.height - entity.bbox.top;
-      //entity.speedY *= -0.5;
       entity.speedY = 0;
     }
   }
@@ -296,7 +297,7 @@ function updateMario(mario) {
 const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
   bbox: {
     left: -0.2,
-    top: -2,
+    top: -0.6,
     width: 0.4,
     height: 0.6
   }
