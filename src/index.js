@@ -1,7 +1,5 @@
 import utils from './utils';
 
-utils.testMethod();
-
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
 canvas.width = 1366;
@@ -74,7 +72,7 @@ Object.values(keyCode).forEach(
   code => (keys[code] = { isDown: false, wentDown: false, wentUp: false })
 );
 
-document.onkeydown = function (event) {
+document.onkeydown = function(event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
@@ -85,7 +83,7 @@ document.onkeydown = function (event) {
   }
 };
 
-document.onkeyup = function (event) {
+document.onkeyup = function(event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
@@ -208,9 +206,17 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
   );
   if (horizWall) {
     if (entity.speedX > 0) {
-      entity.x = horizWall.x + horizWall.bbox.left - entity.bbox.left - entity.bbox.width;
+      entity.x =
+        horizWall.x +
+        horizWall.bbox.left -
+        entity.bbox.left -
+        entity.bbox.width;
     } else {
-      entity.x = horizWall.x + horizWall.bbox.left + horizWall.bbox.width - entity.bbox.left;
+      entity.x =
+        horizWall.x +
+        horizWall.bbox.left +
+        horizWall.bbox.width -
+        entity.bbox.left;
     }
     entity.speedX = 0;
   }
@@ -223,11 +229,13 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
   );
   if (vertWall) {
     if (entity.speedY > 0) {
-      entity.y = vertWall.y + vertWall.bbox.top - entity.bbox.top - entity.bbox.height;
+      entity.y =
+        vertWall.y + vertWall.bbox.top - entity.bbox.top - entity.bbox.height;
       isOnGround = true;
       entity.speedY = 0;
     } else {
-      entity.y = vertWall.y + vertWall.bbox.top + vertWall.bbox.height - entity.bbox.top;
+      entity.y =
+        vertWall.y + vertWall.bbox.top + vertWall.bbox.height - entity.bbox.top;
       entity.speedY = 0;
     }
   }
