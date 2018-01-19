@@ -1,5 +1,7 @@
 import utils from './utils';
 
+utils.testMethod();
+
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
 canvas.width = 1366;
@@ -11,16 +13,15 @@ const settings = {
   pixelsPerMeter: 64,
   tileSize: 1,
   timeSpeed: 1,
-  gravity: 20,
+  gravity: 20
 };
 
 const time = {
   deltaTime: 0,
-  totalTime: 0,
+  totalTime: 0
 };
 
 window.settings = settings;
-
 
 function addEntity(type) {
   const entity = {
@@ -30,14 +31,14 @@ function addEntity(type) {
       left: 0,
       top: 0,
       width: 0,
-      height: 0,
+      height: 0
     },
     speedX: 0,
     speedY: 0,
 
     type,
     index: 0,
-    collisionIndex: 0,
+    collisionIndex: 0
   };
 
   const typeInfo = entityTypes[type];
@@ -64,15 +65,16 @@ const keyCode = {
   ARROW_LEFT: 37,
   ARROW_UP: 38,
   ARROW_RIGHT: 39,
-  ARROW_DOWN: 40,
+  ARROW_DOWN: 40
 };
 
 const keys = {};
 
-Object.values(keyCode).forEach(code =>
-  keys[code] = { isDown: false, wentDown: false, wentUp: false });
+Object.values(keyCode).forEach(
+  code => (keys[code] = { isDown: false, wentDown: false, wentUp: false })
+);
 
-document.onkeydown = function (event) {
+document.onkeydown = function(event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
@@ -83,7 +85,7 @@ document.onkeydown = function (event) {
   }
 };
 
-document.onkeyup = function (event) {
+document.onkeyup = function(event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
@@ -102,7 +104,7 @@ function addEntityType(mapSymbol, updateFunc, defaultState = {}) {
   entityTypes.push({
     updateFunc,
     collisionList: utils.unorderedList(),
-    defaultState,
+    defaultState
   });
   dictSymbolToEntityType[mapSymbol] = type;
   return type;
@@ -142,10 +144,12 @@ function updateGame() {
 
 function drawRect(x, y, width, height, color) {
   ctx.fillStyle = color;
-  ctx.fillRect(x * settings.pixelsPerMeter,
+  ctx.fillRect(
+    x * settings.pixelsPerMeter,
     y * settings.pixelsPerMeter,
     width * settings.pixelsPerMeter,
-    height * settings.pixelsPerMeter);
+    height * settings.pixelsPerMeter
+  );
 }
 
 function createMap(asciiMapRows) {
@@ -194,24 +198,44 @@ function checkCollision(entity, otherEntityType, offsetX = 0, offetY = 0) {
 function moveAndCheckForObstacles(entity, obstacleEntityType) {
   let isOnGround = false;
 
-  const horizWall = checkCollision(entity, obstacleEntityType, entity.speedX * time.deltaTime, 0);
+  const horizWall = checkCollision(
+    entity,
+    obstacleEntityType,
+    entity.speedX * time.deltaTime,
+    0
+  );
   if (horizWall) {
     if (entity.speedX > 0) {
-      entity.x = horizWall.x + horizWall.bbox.left - entity.bbox.width - entity.bbox.left;
+      entity.x =
+        horizWall.x +
+        horizWall.bbox.left -
+        entity.bbox.width -
+        entity.bbox.left;
     } else {
-      entity.x = horizWall.x + horizWall.bbox.width - entity.bbox.left + horizWall.bbox.left;
+      entity.x =
+        horizWall.x +
+        horizWall.bbox.width -
+        entity.bbox.left +
+        horizWall.bbox.left;
     }
     entity.speedX = 0;
   }
 
-  const vertWall = checkCollision(entity, obstacleEntityType, entity.speedX * time.deltaTime, entity.speedY * time.deltaTime);
+  const vertWall = checkCollision(
+    entity,
+    obstacleEntityType,
+    entity.speedX * time.deltaTime,
+    entity.speedY * time.deltaTime
+  );
   if (vertWall) {
     if (entity.speedY > 0) {
-      entity.y = vertWall.y + vertWall.bbox.top - entity.bbox.height - entity.bbox.top;
+      entity.y =
+        vertWall.y + vertWall.bbox.top - entity.bbox.height - entity.bbox.top;
       isOnGround = true;
       entity.speedY = 0;
     } else {
-      entity.y = vertWall.y + vertWall.bbox.height - entity.bbox.top + vertWall.bbox.top;
+      entity.y =
+        vertWall.y + vertWall.bbox.height - entity.bbox.top + vertWall.bbox.top;
       //entity.speedY *= -0.5;
       entity.speedY = 0;
     }
@@ -223,17 +247,18 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
   return isOnGround;
 }
 
-
 // test code
 
 updateGame();
 
 function updateWall(wall) {
-  drawRect(wall.x + wall.bbox.left,
+  drawRect(
+    wall.x + wall.bbox.left,
     wall.y + wall.bbox.top,
     wall.bbox.width,
     wall.bbox.height,
-    'lawngreen');
+    'lawngreen'
+  );
 }
 
 const ENTITY_TYPE_WALL = addEntityType('#', updateWall, {
@@ -241,8 +266,8 @@ const ENTITY_TYPE_WALL = addEntityType('#', updateWall, {
     left: 0,
     top: 0,
     width: settings.tileSize,
-    height: settings.tileSize,
-  },
+    height: settings.tileSize
+  }
 });
 
 function updateMario(mario) {
@@ -252,7 +277,6 @@ function updateMario(mario) {
   const keyDown = keys[keyCode.ARROW_DOWN];
   const keySpace = keys[keyCode.SPACE];
 
-
   const metersPerSecondSq = 60;
   const friction = 10;
 
@@ -260,7 +284,7 @@ function updateMario(mario) {
   const accelY = (keyDown.isDown - keyUp.isDown) * metersPerSecondSq;
 
   mario.speedX += accelX * time.deltaTime;
-  mario.speedY += accelY * time.deltaTime;//settings.gravity * time.deltaTime;
+  mario.speedY += accelY * time.deltaTime; //settings.gravity * time.deltaTime;
   mario.speedX *= 1 - friction * time.deltaTime;
   mario.speedY *= 1 - friction * time.deltaTime;
 
@@ -270,11 +294,13 @@ function updateMario(mario) {
     mario.speedY = -12;
   }
 
-  drawRect(mario.x + mario.bbox.left,
+  drawRect(
+    mario.x + mario.bbox.left,
     mario.y + mario.bbox.top,
     mario.bbox.width,
     mario.bbox.height,
-    'yellow');
+    'yellow'
+  );
 }
 
 const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
@@ -282,8 +308,8 @@ const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
     left: -0.2,
     top: -0.2,
     width: 0.4,
-    height: 0.6,
-  },
+    height: 0.6
+  }
 });
 
 const asciiMapRows = [
@@ -298,11 +324,10 @@ const asciiMapRows = [
   '                     ',
   '#        ####        ',
   '#   @                ',
-  '######      ######   ',
+  '######      ######   '
 ];
 
 createMap(asciiMapRows);
-
 
 export default {
   addEntityType,
@@ -313,5 +338,5 @@ export default {
   createMap,
   settings,
   moveAndCheckForObstacles,
-  checkCollision,
+  checkCollision
 };

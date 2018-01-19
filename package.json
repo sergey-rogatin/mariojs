@@ -10,6 +10,6 @@
   "dependencies": {},
   "devDependencies": {
     "eslint": "^4.15.0",
-    "webpack": "^3.10.0"
+    "parcel-bundler": "^1.4.1"
   }
 }

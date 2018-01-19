@@ -1,13 +1,12 @@
 /**
  * returns the middle of three numbers
  * @param {number} a
- * @param {number} b 
- * @param {number} c 
+ * @param {number} b
+ * @param {number} c
  */
 function median(a, b, c) {
-  return a > b ? (c > a ? a : (b > c ? b : c)) : (c > b ? b : (a > c ? a : c));
+  return a > b ? (c > a ? a : b > c ? b : c) : c > b ? b : a > c ? a : c;
 }
-
 
 function unorderedList() {
   return {
@@ -29,7 +28,12 @@ function unorderedList() {
 }
 unorderedList.REMOVED_ITEM = Symbol('REMOVED_ITEM');
 
+const testMethod = () => {
+  console.log('parcel is working');
+};
+
 export default {
   median,
   unorderedList,
+  testMethod
 };
