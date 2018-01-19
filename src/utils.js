@@ -29,7 +29,7 @@ function unorderedList() {
 unorderedList.REMOVED_ITEM = Symbol('REMOVED_ITEM');
 
 const testMethod = () => {
-  console.log('parcel is working');
+  console.log('parcel is working dsad');
 };
 
 export default {

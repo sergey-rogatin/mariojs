@@ -74,7 +74,7 @@ Object.values(keyCode).forEach(
   code => (keys[code] = { isDown: false, wentDown: false, wentUp: false })
 );
 
-document.onkeydown = function(event) {
+document.onkeydown = function (event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
@@ -85,7 +85,7 @@ document.onkeydown = function(event) {
   }
 };
 
-document.onkeyup = function(event) {
+document.onkeyup = function (event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
