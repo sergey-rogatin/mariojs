@@ -380,8 +380,8 @@ function updateMario(mario) {
     drawSprite(sprMarioIdle, mario.x, mario.y, 0, 0.4 * dir, 0.4);
   }
 
-  camera.x = mario.x;
-  camera.y = mario.y;
+  camera.x += (mario.x - camera.x) * 0.1;
+  camera.y += (mario.y - camera.y) * 0.1;
 }
 
 const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
