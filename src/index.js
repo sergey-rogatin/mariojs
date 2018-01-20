@@ -113,9 +113,22 @@ function addEntityType(mapSymbol, updateFunc, defaultState = {}) {
 
 let prevTime = performance.now();
 
+const camera = {
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  width: canvas.width / settings.pixelsPerMeter,
+  height: canvas.height / settings.pixelsPerMeter,
+};
+
 function updateGame() {
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  ctx.translate(
+    -Math.floor((camera.x - camera.width / 2) * settings.pixelsPerMeter),
+    -Math.floor((camera.y - camera.height / 2) * settings.pixelsPerMeter),
+  );
 
   for (let index = 0; index < entities.items.length; index++) {
     const entity = entities.items[index];
@@ -126,6 +139,8 @@ function updateGame() {
       }
     }
   }
+
+  ctx.restore();
 
   // clear keyboard inputs
   Object.values(keys).forEach(key => {
@@ -239,7 +254,7 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
     } else {
       entity.y =
         vertWall.y + vertWall.bbox.top + vertWall.bbox.height - entity.bbox.top;
-      entity.speedY = 0;
+      entity.speedY *= -0.5;
     }
   }
 
@@ -311,6 +326,7 @@ const ENTITY_TYPE_WALL = addEntityType('#', updateWall, {
   },
 });
 
+// загрузка спрайтов будет не в юзеркоде наверн
 const sprMarioRunning = loadSprite(imgMarioRunning, -76, -170, 2);
 const sprMarioJumping = loadSprite(imgMarioJumping, -76, -170);
 const sprMarioIdle = loadSprite(imgMarioIdle, -76, -170);
@@ -338,7 +354,6 @@ function updateMario(mario) {
   mario.speedX += accelX * time.deltaTime;
   mario.speedY += settings.gravity * time.deltaTime;
   mario.speedX *= 1 - friction * time.deltaTime;
-  //mario.speedY *= 1 - friction * time.deltaTime;
 
   const isOnGround = moveAndCheckForObstacles(mario, ENTITY_TYPE_WALL);
 
@@ -364,6 +379,9 @@ function updateMario(mario) {
   } else {
     drawSprite(sprMarioIdle, mario.x, mario.y, 0, 0.4 * dir, 0.4);
   }
+
+  camera.x = mario.x;
+  camera.y = mario.y;
 }
 
 const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
