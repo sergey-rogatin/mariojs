@@ -1,15 +1,18 @@
 import utils from './utils';
 
 const canvas = document.querySelector('#game');
+canvas.style.imageRendering = 'pixelated';
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
-canvas.width = 1280;
-canvas.height = 760;
+canvas.width = 300;
+canvas.height = 200;
+canvas.style.width = 1200;
+canvas.style.height = 800;
 
 const entities = utils.unorderedList();
 
 const settings = {
-  pixelsPerMeter: 48,
+  pixelsPerMeter: 16,
   tileSize: 1,
   timeSpeed: 1,
   gravity: 20
@@ -125,8 +128,8 @@ function updateGame() {
 
   ctx.save();
   ctx.translate(
-    -Math.floor((camera.x - cameraWidth / 2) * settings.pixelsPerMeter),
-    -Math.floor((camera.y - cameraHeight / 2) * settings.pixelsPerMeter)
+    -((camera.x - cameraWidth / 2) * settings.pixelsPerMeter),
+    -((camera.y - cameraHeight / 2) * settings.pixelsPerMeter)
   );
 
   for (let index = 0; index < entities.items.length; index++) {
@@ -294,7 +297,7 @@ function drawSprite(sprite, x, y, speed = 0, scaleX = 1, scaleY = 1) {
     currentFrame * sprite.width,
     0,
     sprite.width,
-    sprite.bitmap.height,
+    sprite.height,
     x * scaleX * 16 + sprite.offsetX,
     y * scaleY * 16 + sprite.offsetY,
     sprite.width,

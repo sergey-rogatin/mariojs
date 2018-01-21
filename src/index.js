@@ -69,6 +69,25 @@ function updateMario(mario) {
     mario.isInitialized = true;
   }
 
+  const absSpeedX = Math.abs(mario.speedX);
+  const dir = mario.direction || 1;
+
+  if (!mario.isOnGround) {
+    // TODO сделать все спрайты правильного размера, чтобы их не нужно было масштабировать в юзеркоде
+    drawSprite(sprMarioJumping, mario.x, mario.y, 0, 1 * dir, 1);
+  } else if (absSpeedX > 1) {
+    drawSprite(
+      sprMarioRunning,
+      mario.x,
+      mario.y,
+      0.03 * absSpeedX,
+      1 * dir,
+      1
+    );
+  } else {
+    drawSprite(sprMarioIdle, mario.x, mario.y, 0, 1 * dir, 1);
+  }
+
   const keyLeft = keys[keyCode.ARROW_LEFT];
   const keyRight = keys[keyCode.ARROW_RIGHT];
   const keySpace = keys[keyCode.SPACE];
@@ -90,30 +109,11 @@ function updateMario(mario) {
   mario.speedX *= 1 - friction * time.deltaTime;
 
   const { vertWall } = moveAndCheckForObstacles(mario, ENTITY_TYPE_WALL);
-  const isOnGround = vertWall && vertWall.y <= mario.y;
+  mario.isOnGround = vertWall && vertWall.y <= mario.y;
 
-  if (keySpace.wentDown && isOnGround) {
+  if (keySpace.wentDown && mario.isOnGround) {
     mario.speedY = -12;
     playSound(sndJump);
-  }
-
-  const absSpeedX = Math.abs(mario.speedX);
-  const dir = mario.direction || 1;
-
-  if (!isOnGround) {
-    // TODO сделать все спрайты правильного размера, чтобы их не нужно было масштабировать в юзеркоде
-    drawSprite(sprMarioJumping, mario.x, mario.y, 0, 1 * dir, 1);
-  } else if (absSpeedX > 1) {
-    drawSprite(
-      sprMarioRunning,
-      mario.x,
-      mario.y,
-      0.03 * absSpeedX,
-      1 * dir,
-      1
-    );
-  } else {
-    drawSprite(sprMarioIdle, mario.x, mario.y, 0, 1 * dir, 1);
   }
 
   const hitEnemy = checkCollision(mario, ENTITY_TYPE_GOOMBA);
@@ -145,8 +145,6 @@ function updateMario(mario) {
 
   camera.x = mario.x;
   camera.y = 6;
-
-  //settings.timeSpeed = mario.y / 10;
 }
 
 const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
