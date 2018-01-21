@@ -2,16 +2,20 @@ import utils from './utils';
 import imgMarioRunning from './sprites/marioRunning.png';
 import imgMarioIdle from './sprites/marioIdle.png';
 import imgMarioJumping from './sprites/marioJumping.png';
+import imgGroundBlock from './sprites/groundBlock.png';
+import imgCoin from './sprites/coin.png';
+import imgGoomba from './sprites/goomba.png';
 
 const canvas = document.querySelector('#game');
 const ctx = canvas.getContext('2d');
-canvas.width = 1366;
-canvas.height = 768;
+ctx.imageSmoothingEnabled = false;
+canvas.width = 1280;
+canvas.height = 760;
 
 const entities = utils.unorderedList();
 
 const settings = {
-  pixelsPerMeter: 64,
+  pixelsPerMeter: 60,
   tileSize: 1,
   timeSpeed: 1,
   gravity: 20
@@ -121,7 +125,7 @@ const camera = {
 };
 
 function updateGame() {
-  ctx.fillStyle = 'black';
+  ctx.fillStyle = '#444';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.save();
@@ -292,33 +296,34 @@ function drawSprite(sprite, x, y, speed = 0, scaleX = 1, scaleY = 1) {
   }
 
   ctx.save();
-  ctx.scale(scaleX, scaleY);
+  ctx.scale(scaleX * settings.pixelsPerMeter / 16, scaleY * settings.pixelsPerMeter / 16);
   ctx.drawImage(
     sprite.bitmap,
     currentFrame * sprite.width,
     0,
     sprite.width,
     sprite.bitmap.height,
-    x * settings.pixelsPerMeter / scaleX + sprite.offsetX,
-    y * settings.pixelsPerMeter / scaleY + sprite.offsetY,
+    x * scaleX * 16 + sprite.offsetX,
+    y * scaleY * 16 + sprite.offsetY,
     sprite.width,
-    sprite.bitmap.height
+    sprite.height,
   );
   ctx.restore();
 }
 
 // test code
 
+// загрузка спрайтов будет не в юзеркоде наверн
+const sprMarioRunning = loadSprite(imgMarioRunning, -8, -16, 2);
+const sprMarioJumping = loadSprite(imgMarioJumping, -8, -16);
+const sprMarioIdle = loadSprite(imgMarioIdle, -8, -16);
+const sprGroundBlock = loadSprite(imgGroundBlock, 0, 0);
+const sprGoomba = loadSprite(imgGoomba, -8, -16, 2);
+
 updateGame();
 
 function updateWall(wall) {
-  drawRect(
-    wall.x + wall.bbox.left,
-    wall.y + wall.bbox.top,
-    wall.bbox.width,
-    wall.bbox.height,
-    'lawngreen'
-  );
+  drawSprite(sprGroundBlock, wall.x, wall.y);
 }
 
 const ENTITY_TYPE_WALL = addEntityType('#', updateWall, {
@@ -329,11 +334,6 @@ const ENTITY_TYPE_WALL = addEntityType('#', updateWall, {
     height: settings.tileSize
   }
 });
-
-// загрузка спрайтов будет не в юзеркоде наверн
-const sprMarioRunning = loadSprite(imgMarioRunning, -76, -170, 2);
-const sprMarioJumping = loadSprite(imgMarioJumping, -76, -170);
-const sprMarioIdle = loadSprite(imgMarioIdle, -76, -170);
 
 
 let playerStartX = 0;
@@ -382,18 +382,18 @@ function updateMario(mario) {
 
   if (!isOnGround) {
     // TODO сделать все спрайты правильного размера, чтобы их не нужно было масштабировать в юзеркоде
-    drawSprite(sprMarioJumping, mario.x, mario.y, 0, 0.4 * dir, 0.4);
+    drawSprite(sprMarioJumping, mario.x, mario.y, 0, 1 * dir, 1);
   } else if (absSpeedX > 1) {
     drawSprite(
       sprMarioRunning,
       mario.x,
       mario.y,
       0.03 * absSpeedX,
-      0.4 * dir,
-      0.4
+      1 * dir,
+      1
     );
   } else {
-    drawSprite(sprMarioIdle, mario.x, mario.y, 0, 0.4 * dir, 0.4);
+    drawSprite(sprMarioIdle, mario.x, mario.y, 0, 1 * dir, 1);
   }
 
   const hitEnemy = checkCollision(mario, ENTITY_TYPE_GOOMBA);
@@ -416,8 +416,8 @@ function updateMario(mario) {
     newMario.y = playerStartY;
   }
 
-  camera.x += (mario.x - camera.x) * 5 * time.deltaTime;
-  camera.y += (mario.y - camera.y) * 5 * time.deltaTime;
+  camera.x = mario.x;
+  camera.y = 6;
 }
 
 const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
@@ -440,13 +440,7 @@ function updateGoomba(goomba) {
     }
   }
   goomba.speedY += settings.gravity * time.deltaTime;
-  drawRect(
-    goomba.x + goomba.bbox.left,
-    goomba.y + goomba.bbox.top,
-    goomba.bbox.width,
-    goomba.bbox.height,
-    'yellow'
-  );
+  drawSprite(sprGoomba, goomba.x, goomba.y, 0.1);
 }
 
 const ENTITY_TYPE_GOOMBA = addEntityType('G', updateGoomba, {
