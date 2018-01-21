@@ -335,7 +335,18 @@ const sprMarioRunning = loadSprite(imgMarioRunning, -76, -170, 2);
 const sprMarioJumping = loadSprite(imgMarioJumping, -76, -170);
 const sprMarioIdle = loadSprite(imgMarioIdle, -76, -170);
 
+
+let playerStartX = 0;
+let playerStartY = 0;
+
 function updateMario(mario) {
+  if (!mario.isInitialized) {
+    playerStartX = mario.x;
+    playerStartY = mario.y;
+
+    mario.isInitialized = true;
+  }
+
   const keyLeft = keys[keyCode.ARROW_LEFT];
   const keyRight = keys[keyCode.ARROW_RIGHT];
   const keyUp = keys[keyCode.ARROW_UP];
@@ -366,13 +377,6 @@ function updateMario(mario) {
     mario.speedY = -12;
   }
 
-  // drawRect(
-  //   mario.x + mario.bbox.left,
-  //   mario.y + mario.bbox.top,
-  //   mario.bbox.width,
-  //   mario.bbox.height,
-  //   'yellow'
-  // );
   const absSpeedX = Math.abs(mario.speedX);
   const dir = mario.direction || 1;
 
@@ -394,13 +398,22 @@ function updateMario(mario) {
 
   const hitEnemy = checkCollision(mario, ENTITY_TYPE_GOOMBA);
   if (hitEnemy) {
-    console.log(hitEnemy.y, mario.y);
     if (hitEnemy.y > mario.y) {
       destroyEntity(hitEnemy);
       mario.speedY = -15;
     } else {
       destroyEntity(mario);
+      const newMario = addEntity(ENTITY_TYPE_MARIO);
+      newMario.x = playerStartX;
+      newMario.y = playerStartY;
     }
+  }
+
+  if (mario.y > 30) {
+    destroyEntity(mario);
+    const newMario = addEntity(ENTITY_TYPE_MARIO);
+    newMario.x = playerStartX;
+    newMario.y = playerStartY;
   }
 
   camera.x += (mario.x - camera.x) * 5 * time.deltaTime;
