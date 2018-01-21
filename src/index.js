@@ -7,6 +7,11 @@ import imgGroundBlock from './sprites/groundBlock.png';
 import imgCoin from './sprites/coin.png';
 import imgGoomba from './sprites/goomba.png';
 
+import audioMainTheme from './sounds/mainTheme.mp3';
+import audioJump from './sounds/jump.wav';
+import audioCoin from './sounds/coin.wav';
+import audioStomp from './sounds/stomp.wav';
+
 const {
   loadSprite,
   drawSprite,
@@ -21,6 +26,8 @@ const {
   destroyEntity,
   camera,
   createMap,
+  loadSound,
+  playSound,
 } = engine;
 
 // загрузка спрайтов будет не в юзеркоде наверн
@@ -29,6 +36,13 @@ const sprMarioJumping = loadSprite(imgMarioJumping, -8, -16);
 const sprMarioIdle = loadSprite(imgMarioIdle, -8, -16);
 const sprGroundBlock = loadSprite(imgGroundBlock, 0, 0);
 const sprGoomba = loadSprite(imgGoomba, -8, -16, 2);
+const sprCoin = loadSprite(imgCoin, 0, 0, 2);
+
+const sndMainTheme = loadSound(audioMainTheme);
+const sndJump = loadSound(audioJump);
+const sndCoin = loadSound(audioCoin);
+const sndStomp = loadSound(audioStomp);
+// playSound(sndMainTheme, true);
 
 function updateWall(wall) {
   drawSprite(sprGroundBlock, wall.x, wall.y);
@@ -80,6 +94,7 @@ function updateMario(mario) {
 
   if (keySpace.wentDown && isOnGround) {
     mario.speedY = -12;
+    playSound(sndJump);
   }
 
   const absSpeedX = Math.abs(mario.speedX);
@@ -106,6 +121,7 @@ function updateMario(mario) {
     if (hitEnemy.y > mario.y) {
       destroyEntity(hitEnemy);
       mario.speedY = -15;
+      playSound(sndStomp);
     } else {
       destroyEntity(mario);
       const newMario = addEntity(ENTITY_TYPE_MARIO);
@@ -121,8 +137,16 @@ function updateMario(mario) {
     newMario.y = playerStartY;
   }
 
+  const hitCoin = checkCollision(mario, ENTITY_TYPE_COIN);
+  if (hitCoin) {
+    destroyEntity(hitCoin);
+    playSound(sndCoin);
+  }
+
   camera.x = mario.x;
   camera.y = 6;
+
+  //settings.timeSpeed = mario.y / 10;
 }
 
 const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
@@ -158,10 +182,24 @@ const ENTITY_TYPE_GOOMBA = addEntityType('G', updateGoomba, {
   speedX: 2,
 });
 
+
+function updateCoin(coin) {
+  drawSprite(sprCoin, coin.x, coin.y, 0.5 * time.deltaTime);
+}
+
+const ENTITY_TYPE_COIN = addEntityType('0', updateCoin, {
+  bbox: {
+    left: 0,
+    top: 0,
+    width: 1,
+    height: 1,
+  }
+});
+
 const asciiMapRows = [
   ' # ##########        ',
   '                     ',
-  '      ###            ',
+  '      ###      0000  ',
   '##  #####      ####  ',
   '#                    ',
   '        #  G         ',

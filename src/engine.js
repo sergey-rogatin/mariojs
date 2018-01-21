@@ -195,7 +195,7 @@ function checkCollision(entity, otherEntityType, offsetX = 0, offsetY = 0) {
       const oRight = oLeft + other.bbox.width;
       const oBottom = oTop + other.bbox.height;
 
-      const eps = 0.0001;
+      const eps = 0.000001;
 
       if (
         eLeft >= oRight - eps ||
@@ -303,6 +303,19 @@ function drawSprite(sprite, x, y, speed = 0, scaleX = 1, scaleY = 1) {
   ctx.restore();
 }
 
+function loadSound(fileName) {
+  const sound = new Audio(fileName);
+  return sound;
+}
+
+function playSound(sound, loop = false, volume = 0.02) {
+  sound.pause();
+  sound.currentTime = 0;
+  sound.loop = loop;
+  sound.volume = volume;
+  sound.play();
+}
+
 updateGame();
 
 export default {
@@ -319,4 +332,6 @@ export default {
   drawSprite,
   time,
   camera,
+  loadSound,
+  playSound,
 };
