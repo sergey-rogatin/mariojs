@@ -75,7 +75,7 @@ Object.values(keyCode).forEach(
   code => (keys[code] = { isDown: false, wentDown: false, wentUp: false })
 );
 
-document.onkeydown = function(event) {
+document.onkeydown = function (event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
@@ -86,7 +86,7 @@ document.onkeydown = function(event) {
   }
 };
 
-document.onkeyup = function(event) {
+document.onkeyup = function (event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
@@ -261,7 +261,7 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
   entity.x += entity.speedX * time.deltaTime;
   entity.y += entity.speedY * time.deltaTime;
 
-  return isOnGround;
+  return { horizWall, vertWall };
 }
 
 function loadSprite(fileName, offsetX = 0, offsetY = 0, frameCount = 1) {
@@ -359,7 +359,8 @@ function updateMario(mario) {
   mario.speedY += settings.gravity * time.deltaTime;
   mario.speedX *= 1 - friction * time.deltaTime;
 
-  const isOnGround = moveAndCheckForObstacles(mario, ENTITY_TYPE_WALL);
+  const { vertWall } = moveAndCheckForObstacles(mario, ENTITY_TYPE_WALL);
+  const isOnGround = vertWall && vertWall.y <= mario.y;
 
   if (keySpace.wentDown && isOnGround) {
     mario.speedY = -12;
@@ -391,8 +392,19 @@ function updateMario(mario) {
     drawSprite(sprMarioIdle, mario.x, mario.y, 0, 0.4 * dir, 0.4);
   }
 
-  camera.x += (mario.x - camera.x) * 0.1;
-  camera.y += (mario.y - camera.y) * 0.1;
+  const hitEnemy = checkCollision(mario, ENTITY_TYPE_GOOMBA);
+  if (hitEnemy) {
+    console.log(hitEnemy.y, mario.y);
+    if (hitEnemy.y > mario.y) {
+      destroyEntity(hitEnemy);
+      mario.speedY = -15;
+    } else {
+      destroyEntity(mario);
+    }
+  }
+
+  camera.x += (mario.x - camera.x) * 5 * time.deltaTime;
+  camera.y += (mario.y - camera.y) * 5 * time.deltaTime;
 }
 
 const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
@@ -402,6 +414,36 @@ const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
     width: 0.9,
     height: 1
   }
+});
+
+
+function updateGoomba(goomba) {
+  const { horizWall } = moveAndCheckForObstacles(goomba, ENTITY_TYPE_WALL);
+  if (horizWall) {
+    if (goomba.x < horizWall.x) {
+      goomba.speedX = -2;
+    } else {
+      goomba.speedX = 2;
+    }
+  }
+  goomba.speedY += settings.gravity * time.deltaTime;
+  drawRect(
+    goomba.x + goomba.bbox.left,
+    goomba.y + goomba.bbox.top,
+    goomba.bbox.width,
+    goomba.bbox.height,
+    'yellow'
+  );
+}
+
+const ENTITY_TYPE_GOOMBA = addEntityType('G', updateGoomba, {
+  bbox: {
+    left: -0.5,
+    top: -1,
+    width: 1,
+    height: 1
+  },
+  speedX: 2,
 });
 
 const asciiMapRows = [
@@ -414,9 +456,9 @@ const asciiMapRows = [
   '#         ###        ',
   '#                    ',
   '                     ',
-  '#        ####        ',
-  '#   @                ',
-  '######      ######   '
+  '#                    ',
+  '#   @    #   G     # ',
+  '######   ########### '
 ];
 
 createMap(asciiMapRows);
