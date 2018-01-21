@@ -75,7 +75,7 @@ Object.values(keyCode).forEach(
   code => (keys[code] = { isDown: false, wentDown: false, wentUp: false })
 );
 
-document.onkeydown = function (event) {
+document.onkeydown = function(event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
@@ -86,7 +86,7 @@ document.onkeydown = function (event) {
   }
 };
 
-document.onkeyup = function (event) {
+document.onkeyup = function(event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
@@ -117,7 +117,7 @@ const camera = {
   x: canvas.width / 2,
   y: canvas.height / 2,
   width: canvas.width / settings.pixelsPerMeter,
-  height: canvas.height / settings.pixelsPerMeter,
+  height: canvas.height / settings.pixelsPerMeter
 };
 
 function updateGame() {
@@ -127,7 +127,7 @@ function updateGame() {
   ctx.save();
   ctx.translate(
     -Math.floor((camera.x - camera.width / 2) * settings.pixelsPerMeter),
-    -Math.floor((camera.y - camera.height / 2) * settings.pixelsPerMeter),
+    -Math.floor((camera.y - camera.height / 2) * settings.pixelsPerMeter)
   );
 
   for (let index = 0; index < entities.items.length; index++) {
@@ -274,7 +274,7 @@ function loadSprite(fileName, offsetX = 0, offsetY = 0, frameCount = 1) {
     frame: 0,
     offsetX,
     offsetY,
-    frameCount,
+    frameCount
   };
   img.onload = () => {
     sprite.width = img.width / frameCount;
@@ -295,10 +295,14 @@ function drawSprite(sprite, x, y, speed = 0, scaleX = 1, scaleY = 1) {
   ctx.scale(scaleX, scaleY);
   ctx.drawImage(
     sprite.bitmap,
-    (currentFrame * sprite.width), 0, sprite.width, sprite.bitmap.height,
+    currentFrame * sprite.width,
+    0,
+    sprite.width,
+    sprite.bitmap.height,
     x * settings.pixelsPerMeter / scaleX + sprite.offsetX,
     y * settings.pixelsPerMeter / scaleY + sprite.offsetY,
-    sprite.width, sprite.bitmap.height
+    sprite.width,
+    sprite.bitmap.height
   );
   ctx.restore();
 }
@@ -323,7 +327,7 @@ const ENTITY_TYPE_WALL = addEntityType('#', updateWall, {
     top: 0,
     width: settings.tileSize,
     height: settings.tileSize
-  },
+  }
 });
 
 // загрузка спрайтов будет не в юзеркоде наверн
@@ -375,7 +379,14 @@ function updateMario(mario) {
     // TODO сделать все спрайты правильного размера, чтобы их не нужно было масштабировать в юзеркоде
     drawSprite(sprMarioJumping, mario.x, mario.y, 0, 0.4 * dir, 0.4);
   } else if (absSpeedX > 1) {
-    drawSprite(sprMarioRunning, mario.x, mario.y, 0.03 * absSpeedX, 0.4 * dir, 0.4);
+    drawSprite(
+      sprMarioRunning,
+      mario.x,
+      mario.y,
+      0.03 * absSpeedX,
+      0.4 * dir,
+      0.4
+    );
   } else {
     drawSprite(sprMarioIdle, mario.x, mario.y, 0, 0.4 * dir, 0.4);
   }
