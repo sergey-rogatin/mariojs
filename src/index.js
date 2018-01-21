@@ -15,7 +15,7 @@ canvas.height = 760;
 const entities = utils.unorderedList();
 
 const settings = {
-  pixelsPerMeter: 60,
+  pixelsPerMeter: 48,
   tileSize: 1,
   timeSpeed: 1,
   gravity: 20
@@ -120,18 +120,19 @@ let prevTime = performance.now();
 const camera = {
   x: canvas.width / 2,
   y: canvas.height / 2,
-  width: canvas.width / settings.pixelsPerMeter,
-  height: canvas.height / settings.pixelsPerMeter
 };
 
 function updateGame() {
   ctx.fillStyle = '#444';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  const cameraWidth = canvas.width / settings.pixelsPerMeter;
+  const cameraHeight = canvas.height / settings.pixelsPerMeter;
+
   ctx.save();
   ctx.translate(
-    -Math.floor((camera.x - camera.width / 2) * settings.pixelsPerMeter),
-    -Math.floor((camera.y - camera.height / 2) * settings.pixelsPerMeter)
+    -Math.floor((camera.x - cameraWidth / 2) * settings.pixelsPerMeter),
+    -Math.floor((camera.y - cameraHeight / 2) * settings.pixelsPerMeter)
   );
 
   for (let index = 0; index < entities.items.length; index++) {
