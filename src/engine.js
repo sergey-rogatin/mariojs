@@ -19,8 +19,8 @@ const globalSettings = {
   gravity: 20
 };
 
-const globalEntityTypeInfo = {};
-const globalEntitiesList = utils.unorderedList();
+const _entityTypesObj = {};
+const _entityList = utils.unorderedList();
 
 const globalKeyCode = {
   SPACE: 32,
@@ -34,7 +34,7 @@ const globalKeys = {};
 const globalTimeInfo = {
   deltaTime: 0,
   totalTime: 0,
-  prevFrameTime: performance.now(),
+  prevFrameTime: performance.now()
 };
 
 const globalCamera = {
@@ -50,7 +50,6 @@ Object.values(globalKeyCode).forEach(
 // start the game
 mainGameLoop();
 
-
 // in user api, all global variables are passed implicitly
 const api = {
   settings: globalSettings,
@@ -61,17 +60,14 @@ const api = {
 
   // entities
   addEntityType: (mapSymbol, updateFunc, defaultState) =>
-    addEntityType(globalEntityTypeInfo, mapSymbol, updateFunc, defaultState),
+    addEntityType(_entityTypesObj, mapSymbol, updateFunc, defaultState),
 
-  addEntity: (type) =>
-    addEntity(globalEntityTypeInfo, globalEntitiesList, type),
+  addEntity: type => addEntity(_entityTypesObj, _entityList, type),
 
-  removeEntity: (entity) =>
-    removeEntity(globalEntitiesList, entity),
+  removeEntity: entity => removeEntity(_entityList, entity),
 
-  createMap: (asciiMapRows) =>
-    createMap(globalEntityTypeInfo, globalEntitiesList, globalSettings, asciiMapRows),
-
+  createMap: asciiMapRows =>
+    createMap(_entityTypesObj, _entityList, globalSettings, asciiMapRows),
 
   // drawing
   loadSprite,
@@ -82,33 +78,36 @@ const api = {
   drawRect: (x, y, width, height, color) =>
     drawRect(globalCtx, x, y, width, height, color),
 
-
   // audio
   loadSound,
 
   playSound,
 
-
   // collision
   checkCollision: (entity, otherTypes, offsetX, offsetY) =>
-    checkCollision(globalEntitiesList, entity, otherTypes, offsetX, offsetY),
+    checkCollision(_entityList, entity, otherTypes, offsetX, offsetY),
 
   moveAndCheckForObstacles: (entity, otherTypes) =>
-    moveAndCheckForObstacles(globalEntitiesList, globalTimeInfo, entity, otherTypes)
+    moveAndCheckForObstacles(_entityList, globalTimeInfo, entity, otherTypes)
 };
 
 export default api;
 
 // entities
-function addEntityType(globalEntityTypeInfo, mapSymbol, updateFunc, defaultState = {}) {
-  globalEntityTypeInfo[mapSymbol] = {
+function addEntityType(
+  entityTypesObj,
+  mapSymbol,
+  updateFunc,
+  defaultState = {}
+) {
+  entityTypesObj[mapSymbol] = {
     updateFunc,
     defaultState
   };
   return mapSymbol;
 }
 
-function addEntity(globalEntityTypeInfo, globalEntitiesList, type) {
+function addEntity(entityTypesObj, entityList, type) {
   const entity = {
     x: 0,
     y: 0,
@@ -123,26 +122,26 @@ function addEntity(globalEntityTypeInfo, globalEntitiesList, type) {
 
     type,
     index: 0,
-    isInitialized: false,
+    isInitialized: false
   };
 
-  const typeInfo = globalEntityTypeInfo[type];
+  const typeInfo = entityTypesObj[type];
   Object.assign(entity, typeInfo.defaultState); // set object default state as was defined in addEntityType()
-  entity.index = globalEntitiesList.add(entity);
+  entity.index = entityList.add(entity);
 
   return entity;
 }
 
-function removeEntity(globalEntitiesList, entity) {
-  globalEntitiesList.remove(entity.index);
+function removeEntity(entityList, entity) {
+  entityList.remove(entity.index);
 }
 
-function createMap(globalEntityTypeInfo, globalEntitiesList, globalSettings, asciiMapRows) {
+function createMap(entityTypesObj, entityList, globalSettings, asciiMapRows) {
   for (let y = 0; y < asciiMapRows.length; y++) {
     const row = asciiMapRows[y];
     for (let x = 0; x < row.length; x++) {
-      if (globalEntityTypeInfo[row[x]]) {
-        const e = addEntity(globalEntityTypeInfo, globalEntitiesList, row[x]);
+      if (entityTypesObj[row[x]]) {
+        const e = addEntity(_entityTypesObj, entityList, row[x]);
         e.x = x * globalSettings.tileSize;
         e.y = y * globalSettings.tileSize;
       }
@@ -150,10 +149,9 @@ function createMap(globalEntityTypeInfo, globalEntitiesList, globalSettings, asc
   }
 }
 
-
 // keyboard input
 
-document.onkeydown = function (event) {
+document.onkeydown = function(event) {
   const key = globalKeys[event.keyCode];
   if (!key) {
     return;
@@ -164,7 +162,7 @@ document.onkeydown = function (event) {
   }
 };
 
-document.onkeyup = function (event) {
+document.onkeyup = function(event) {
   const key = globalKeys[event.keyCode];
   if (!key) {
     return;
@@ -174,7 +172,6 @@ document.onkeyup = function (event) {
     key.isDown = false;
   }
 };
-
 
 // timing and main game loop
 
@@ -188,10 +185,10 @@ function mainGameLoop() {
     -(globalCamera.y * globalSettings.pixelsPerMeter - globalCanvas.height / 2)
   );
 
-  for (let index = 0; index < globalEntitiesList.items.length; index++) {
-    const entity = globalEntitiesList.items[index];
+  for (let index = 0; index < _entityList.items.length; index++) {
+    const entity = _entityList.items[index];
     if (entity !== utils.unorderedList.REMOVED_ITEM) {
-      const typeInfo = globalEntityTypeInfo[entity.type];
+      const typeInfo = _entityTypesObj[entity.type];
       if (typeInfo.updateFunc) {
         typeInfo.updateFunc(entity);
       }
@@ -207,7 +204,8 @@ function mainGameLoop() {
   });
 
   const newTime = performance.now();
-  globalTimeInfo.deltaTime = (newTime - globalTimeInfo.prevFrameTime) * 0.001 * globalSettings.timeSpeed;
+  globalTimeInfo.deltaTime =
+    (newTime - globalTimeInfo.prevFrameTime) * 0.001 * globalSettings.timeSpeed;
   if (globalTimeInfo.deltaTime > 0.1) {
     globalTimeInfo.deltaTime = 0.016;
   }
@@ -215,7 +213,6 @@ function mainGameLoop() {
   globalTimeInfo.prevFrameTime = newTime;
   requestAnimationFrame(mainGameLoop);
 }
-
 
 // graphics functions
 
@@ -229,7 +226,7 @@ function loadSprite(fileName, offsetX = 0, offsetY = 0, frameCount = 1) {
     offsetX,
     offsetY,
     frameCount,
-    entityFrameMap: new Map(),
+    entityFrameMap: new Map()
   };
   img.onload = () => {
     sprite.width = img.width / frameCount;
@@ -239,7 +236,14 @@ function loadSprite(fileName, offsetX = 0, offsetY = 0, frameCount = 1) {
   return sprite;
 }
 
-function drawSprite(globalCtx, sprite, entity, animationSpeed = 0, scaleX = 1, scaleY = 1) {
+function drawSprite(
+  globalCtx,
+  sprite,
+  entity,
+  animationSpeed = 0,
+  scaleX = 1,
+  scaleY = 1
+) {
   // the current frame of the sprite is saved in a map(entity -> currentFrame)
   let savedFrame = sprite.entityFrameMap.get(entity) || 0;
 
@@ -251,10 +255,7 @@ function drawSprite(globalCtx, sprite, entity, animationSpeed = 0, scaleX = 1, s
   sprite.entityFrameMap.set(entity, savedFrame);
 
   globalCtx.save();
-  globalCtx.scale(
-    scaleX,
-    scaleY
-  );
+  globalCtx.scale(scaleX, scaleY);
   globalCtx.drawImage(
     sprite.bitmap,
     currentFrame * sprite.width,
@@ -279,7 +280,6 @@ function drawRect(globalCtx, x, y, width, height, color) {
   );
 }
 
-
 // audio functions
 
 function loadSound(fileName) {
@@ -295,11 +295,16 @@ function playSound(sound, loop = false, volume = 0.02) {
   sound.play();
 }
 
-
 // collision functions
 
-function checkCollision(globalEntitiesList, entity, otherTypes, offsetX = 0, offsetY = 0) {
-  for (let other of globalEntitiesList.items) {
+function checkCollision(
+  entityList,
+  entity,
+  otherTypes,
+  offsetX = 0,
+  offsetY = 0
+) {
+  for (let other of entityList.items) {
     if (other !== utils.unorderedList.REMOVED_ITEM && entity !== other) {
       if (!otherTypes.includes(other.type)) {
         continue;
@@ -331,9 +336,14 @@ function checkCollision(globalEntitiesList, entity, otherTypes, offsetX = 0, off
   return null;
 }
 
-function moveAndCheckForObstacles(globalEntitiesList, globalTimeInfo, entity, otherTypes) {
+function moveAndCheckForObstacles(
+  entityList,
+  globalTimeInfo,
+  entity,
+  otherTypes
+) {
   const horizWall = checkCollision(
-    globalEntitiesList,
+    entityList,
     entity,
     otherTypes,
     entity.speedX * globalTimeInfo.deltaTime,
@@ -341,15 +351,23 @@ function moveAndCheckForObstacles(globalEntitiesList, globalTimeInfo, entity, ot
   );
   if (horizWall) {
     if (entity.speedX > 0) {
-      entity.x = horizWall.x + horizWall.bbox.left - entity.bbox.left - entity.bbox.width;
+      entity.x =
+        horizWall.x +
+        horizWall.bbox.left -
+        entity.bbox.left -
+        entity.bbox.width;
     } else {
-      entity.x = horizWall.x + horizWall.bbox.left + horizWall.bbox.width - entity.bbox.left;
+      entity.x =
+        horizWall.x +
+        horizWall.bbox.left +
+        horizWall.bbox.width -
+        entity.bbox.left;
     }
     entity.speedX = 0;
   }
 
   const vertWall = checkCollision(
-    globalEntitiesList,
+    _entityList,
     entity,
     otherTypes,
     entity.speedX * globalTimeInfo.deltaTime,
@@ -357,10 +375,12 @@ function moveAndCheckForObstacles(globalEntitiesList, globalTimeInfo, entity, ot
   );
   if (vertWall) {
     if (entity.speedY > 0) {
-      entity.y = vertWall.y + vertWall.bbox.top - entity.bbox.top - entity.bbox.height;
+      entity.y =
+        vertWall.y + vertWall.bbox.top - entity.bbox.top - entity.bbox.height;
       entity.speedY = 0;
     } else {
-      entity.y = vertWall.y + vertWall.bbox.top + vertWall.bbox.height - entity.bbox.top;
+      entity.y =
+        vertWall.y + vertWall.bbox.top + vertWall.bbox.height - entity.bbox.top;
       entity.speedY *= -0.5;
     }
   }
