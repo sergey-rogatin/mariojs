@@ -6,11 +6,14 @@ import imgMarioJumping from './sprites/marioJumping.png';
 import imgGroundBlock from './sprites/groundBlock.png';
 import imgCoin from './sprites/coin.png';
 import imgGoomba from './sprites/goomba.png';
+import imgQuestionBlock from './sprites/questionBlock.png';
 
 import audioMainTheme from './sounds/mainTheme.mp3';
 import audioJump from './sounds/jump.wav';
 import audioCoin from './sounds/coin.wav';
 import audioStomp from './sounds/stomp.wav';
+
+// TODO баг с анимацией (чем больше объектов с этим спрайтом на экране, тем быстрее анимация)
 
 const {
   loadSprite,
@@ -37,15 +40,17 @@ const sprMarioIdle = loadSprite(imgMarioIdle, -8, -16);
 const sprGroundBlock = loadSprite(imgGroundBlock, 0, 0);
 const sprGoomba = loadSprite(imgGoomba, -8, -16, 2);
 const sprCoin = loadSprite(imgCoin, 0, 0, 2);
+const sprQuestionBlock = loadSprite(imgQuestionBlock, 0, 0, 1);
 
 const sndMainTheme = loadSound(audioMainTheme);
 const sndJump = loadSound(audioJump);
 const sndCoin = loadSound(audioCoin);
 const sndStomp = loadSound(audioStomp);
-// playSound(sndMainTheme, true);
+playSound(sndMainTheme, true);
+
 
 function updateWall(wall) {
-  drawSprite(sprGroundBlock, wall.x, wall.y);
+  drawSprite(sprGroundBlock, wall);
 }
 
 const ENTITY_TYPE_WALL = addEntityType('#', updateWall, {
@@ -73,19 +78,16 @@ function updateMario(mario) {
   const dir = mario.direction || 1;
 
   if (!mario.isOnGround) {
-    // TODO сделать все спрайты правильного размера, чтобы их не нужно было масштабировать в юзеркоде
-    drawSprite(sprMarioJumping, mario.x, mario.y, 0, 1 * dir, 1);
+    drawSprite(sprMarioJumping, mario, 0, dir);
   } else if (absSpeedX > 1) {
     drawSprite(
       sprMarioRunning,
-      mario.x,
-      mario.y,
+      mario,
       0.03 * absSpeedX,
-      1 * dir,
-      1
+      dir
     );
   } else {
-    drawSprite(sprMarioIdle, mario.x, mario.y, 0, 1 * dir, 1);
+    drawSprite(sprMarioIdle, mario, 0, dir);
   }
 
   const keyLeft = keys[keyCode.ARROW_LEFT];
@@ -108,7 +110,7 @@ function updateMario(mario) {
   mario.speedY += settings.gravity * time.deltaTime;
   mario.speedX *= 1 - friction * time.deltaTime;
 
-  const { vertWall } = moveAndCheckForObstacles(mario, ENTITY_TYPE_WALL);
+  const { vertWall } = moveAndCheckForObstacles(mario, [ENTITY_TYPE_WALL, ENTITY_TYPE_QUESTION_BLOCK]);
   mario.isOnGround = vertWall && vertWall.y <= mario.y;
 
   if (keySpace.wentDown && mario.isOnGround) {
@@ -116,7 +118,15 @@ function updateMario(mario) {
     playSound(sndJump);
   }
 
-  const hitEnemy = checkCollision(mario, ENTITY_TYPE_GOOMBA);
+  // question blocks
+  if (vertWall && vertWall.type === ENTITY_TYPE_QUESTION_BLOCK && vertWall.y < mario.y) {
+    const coin = addEntity(ENTITY_TYPE_COIN);
+    coin.x = vertWall.x;
+    coin.y = vertWall.y - settings.tileSize;
+    coin.isFlying = true;
+  }
+
+  const hitEnemy = checkCollision(mario, [ENTITY_TYPE_GOOMBA]);
   if (hitEnemy) {
     if (hitEnemy.y > mario.y) {
       destroyEntity(hitEnemy);
@@ -137,7 +147,7 @@ function updateMario(mario) {
     newMario.y = playerStartY;
   }
 
-  const hitCoin = checkCollision(mario, ENTITY_TYPE_COIN);
+  const hitCoin = checkCollision(mario, [ENTITY_TYPE_COIN]);
   if (hitCoin) {
     destroyEntity(hitCoin);
     playSound(sndCoin);
@@ -158,7 +168,7 @@ const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
 
 
 function updateGoomba(goomba) {
-  const { horizWall } = moveAndCheckForObstacles(goomba, ENTITY_TYPE_WALL);
+  const { horizWall } = moveAndCheckForObstacles(goomba, [ENTITY_TYPE_WALL, ENTITY_TYPE_QUESTION_BLOCK]);
   if (horizWall) {
     if (goomba.x < horizWall.x) {
       goomba.speedX = -2;
@@ -167,7 +177,7 @@ function updateGoomba(goomba) {
     }
   }
   goomba.speedY += settings.gravity * time.deltaTime;
-  drawSprite(sprGoomba, goomba.x, goomba.y, 1 * time.deltaTime);
+  drawSprite(sprGoomba, goomba, 3 * time.deltaTime);
 }
 
 const ENTITY_TYPE_GOOMBA = addEntityType('G', updateGoomba, {
@@ -177,12 +187,23 @@ const ENTITY_TYPE_GOOMBA = addEntityType('G', updateGoomba, {
     width: 1,
     height: 1
   },
-  speedX: 2,
+  speedX: 2
 });
 
 
 function updateCoin(coin) {
-  drawSprite(sprCoin, coin.x, coin.y, 0.5 * time.deltaTime);
+  if (!coin.isInitialized) {
+    coin.startY = coin.y;
+    coin.isInitialized = true;
+  }
+
+  drawSprite(sprCoin, coin, 2 * time.deltaTime);
+  if (coin.isFlying) {
+    coin.y -= 4 * time.deltaTime;
+    if (coin.y < coin.startY - 1) {
+      destroyEntity(coin);
+    }
+  }
 }
 
 const ENTITY_TYPE_COIN = addEntityType('0', updateCoin, {
@@ -194,19 +215,32 @@ const ENTITY_TYPE_COIN = addEntityType('0', updateCoin, {
   }
 });
 
+function updateQuestionBlock(block) {
+  drawSprite(sprQuestionBlock, block);
+}
+
+const ENTITY_TYPE_QUESTION_BLOCK = addEntityType('?', updateQuestionBlock, {
+  bbox: {
+    left: 0,
+    top: 0,
+    width: 1,
+    height: 1,
+  }
+});
+
 const asciiMapRows = [
-  ' # ##########        ',
-  '                     ',
-  '      ###      0000  ',
-  '##  #####      ####  ',
-  '#                    ',
-  '        #  G         ',
-  '#         ###        ',
-  '#                    ',
-  '                     ',
-  '#                    ',
-  '#   @    #   G G   # ',
-  '######   ########### '
+  ' # ##########                                             ',
+  '                                                          ',
+  '      ###      0000                                       ',
+  '##  #####      ####                                       ',
+  '#                                                         ',
+  '        #  G                                              ',
+  '#         ###                                             ',
+  '#                                                         ',
+  '  ?                                                       ',
+  '#                                                         ',
+  '#   @    #   G G   #        0000000000000000000           ',
+  '######   #################################################'
 ];
 
 createMap(asciiMapRows);

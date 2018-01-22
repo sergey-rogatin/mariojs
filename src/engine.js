@@ -37,10 +37,11 @@ function addEntity(type) {
     },
     speedX: 0,
     speedY: 0,
+    flags: [],
 
     type,
     index: 0,
-    collisionIndex: 0
+    isInitialized: false,
   };
 
   const typeInfo = entityTypes[type];
@@ -49,17 +50,11 @@ function addEntity(type) {
   const index = entities.add(entity);
   entity.index = index;
 
-  const collisionIndex = typeInfo.collisionList.add(entity);
-  entity.collisionIndex = collisionIndex;
-
   return entity;
 }
 
 function destroyEntity(entity) {
   entities.remove(entity.index);
-
-  const typeInfo = entityTypes[entity.type];
-  typeInfo.collisionList.remove(entity.collisionIndex);
 }
 
 const keyCode = {
@@ -105,7 +100,6 @@ function addEntityType(mapSymbol, updateFunc, defaultState = {}) {
   const type = entityTypes.length;
   entityTypes.push({
     updateFunc,
-    collisionList: utils.unorderedList(),
     defaultState
   });
   dictSymbolToEntityType[mapSymbol] = type;
@@ -184,10 +178,12 @@ function createMap(asciiMapRows) {
   }
 }
 
-function checkCollision(entity, otherEntityType, offsetX = 0, offsetY = 0) {
-  const typeInfo = entityTypes[otherEntityType];
-  for (let other of typeInfo.collisionList.items) {
+function checkCollision(entity, otherTypes, offsetX = 0, offsetY = 0) {
+  for (let other of entities.items) {
     if (other !== utils.unorderedList.REMOVED_ITEM && entity !== other) {
+      if (!otherTypes.includes(other.type)) {
+        continue;
+      }
       const eLeft = entity.x + offsetX + entity.bbox.left;
       const eTop = entity.y + offsetY + entity.bbox.top;
       const eRight = eLeft + entity.bbox.width;
@@ -215,10 +211,10 @@ function checkCollision(entity, otherEntityType, offsetX = 0, offsetY = 0) {
   return null;
 }
 
-function moveAndCheckForObstacles(entity, obstacleEntityType) {
+function moveAndCheckForObstacles(entity, otherTypes) {
   const horizWall = checkCollision(
     entity,
-    obstacleEntityType,
+    otherTypes,
     entity.speedX * time.deltaTime,
     0
   );
@@ -241,7 +237,7 @@ function moveAndCheckForObstacles(entity, obstacleEntityType) {
 
   const vertWall = checkCollision(
     entity,
-    obstacleEntityType,
+    otherTypes,
     entity.speedX * time.deltaTime,
     entity.speedY * time.deltaTime
   );
@@ -270,10 +266,10 @@ function loadSprite(fileName, offsetX = 0, offsetY = 0, frameCount = 1) {
     bitmap: img,
     width: 0,
     height: 0,
-    frame: 0,
     offsetX,
     offsetY,
-    frameCount
+    frameCount,
+    entityFrameMap: new Map(),
   };
   img.onload = () => {
     sprite.width = img.width / frameCount;
@@ -283,12 +279,18 @@ function loadSprite(fileName, offsetX = 0, offsetY = 0, frameCount = 1) {
   return sprite;
 }
 
-function drawSprite(sprite, x, y, speed = 0, scaleX = 1, scaleY = 1) {
-  const currentFrame = Math.floor(sprite.frame);
-  sprite.frame += speed;
-  if (sprite.frame >= sprite.frameCount) {
-    sprite.frame = 0;
+function drawSprite(sprite, entity, speed = 0, scaleX = 1, scaleY = 1) {
+  let savedFrame = sprite.entityFrameMap.get(entity);
+  if (!savedFrame) {
+    savedFrame = 0;
   }
+
+  const currentFrame = Math.floor(savedFrame);
+  savedFrame += speed;
+  if (savedFrame >= sprite.frameCount) {
+    savedFrame = 0;
+  }
+  sprite.entityFrameMap.set(entity, savedFrame);
 
   ctx.save();
   ctx.scale(scaleX * settings.pixelsPerMeter / 16, scaleY * settings.pixelsPerMeter / 16);
@@ -298,8 +300,8 @@ function drawSprite(sprite, x, y, speed = 0, scaleX = 1, scaleY = 1) {
     0,
     sprite.width,
     sprite.height,
-    x * scaleX * 16 + sprite.offsetX,
-    y * scaleY * 16 + sprite.offsetY,
+    entity.x * scaleX * 16 + sprite.offsetX,
+    entity.y * scaleY * 16 + sprite.offsetY,
     sprite.width,
     sprite.height
   );
