@@ -93,24 +93,22 @@ document.onkeyup = function (event) {
   }
 };
 
-const entityTypes = [];
-const dictSymbolToEntityType = {};
+const entityTypes = {};
 
 function addEntityType(mapSymbol, updateFunc, defaultState = {}) {
-  const type = entityTypes.length;
-  entityTypes.push({
+  entityTypes[mapSymbol] = {
+    type: mapSymbol,
     updateFunc,
     defaultState
-  });
-  dictSymbolToEntityType[mapSymbol] = type;
-  return type;
+  };
+  return mapSymbol;
 }
 
 let prevTime = performance.now();
 
 const camera = {
   x: canvas.width / 2,
-  y: canvas.height / 2,
+  y: canvas.height / 2
 };
 
 function updateGame() {
@@ -168,9 +166,8 @@ function createMap(asciiMapRows) {
   for (let y = 0; y < asciiMapRows.length; y++) {
     const row = asciiMapRows[y];
     for (let x = 0; x < row.length; x++) {
-      const entityType = dictSymbolToEntityType[row[x]];
-      if (entityType !== undefined) {
-        const e = addEntity(entityType);
+      if (entityTypes[row[x]]) {
+        const e = addEntity(row[x]);
         e.x = x * settings.tileSize;
         e.y = y * settings.tileSize;
       }
@@ -293,7 +290,10 @@ function drawSprite(sprite, entity, speed = 0, scaleX = 1, scaleY = 1) {
   sprite.entityFrameMap.set(entity, savedFrame);
 
   ctx.save();
-  ctx.scale(scaleX * settings.pixelsPerMeter / 16, scaleY * settings.pixelsPerMeter / 16);
+  ctx.scale(
+    scaleX * settings.pixelsPerMeter / 16,
+    scaleY * settings.pixelsPerMeter / 16
+  );
   ctx.drawImage(
     sprite.bitmap,
     currentFrame * sprite.width,
@@ -338,5 +338,5 @@ export default {
   time,
   camera,
   loadSound,
-  playSound,
+  playSound
 };
