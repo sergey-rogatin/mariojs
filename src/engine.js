@@ -9,7 +9,7 @@ canvas.height = 200;
 canvas.style.width = 1200;
 canvas.style.height = 800;
 
-const entities = utils.unorderedList();
+const entitiesList = utils.unorderedList();
 
 const settings = {
   pixelsPerMeter: 16,
@@ -25,7 +25,9 @@ const time = {
 
 window.settings = settings;
 
-function addEntity(type) {
+const globalEntityTypes = {};
+
+function addEntity(entitiesList, type) {
   const entity = {
     x: 0,
     y: 0,
@@ -44,17 +46,16 @@ function addEntity(type) {
     isInitialized: false,
   };
 
-  const typeInfo = entityTypes[type];
+  const typeInfo = globalEntityTypes[type];
   Object.assign(entity, typeInfo.defaultState);
 
-  const index = entities.add(entity);
-  entity.index = index;
+  entity.index = entitiesList.add(entity);
 
   return entity;
 }
 
-function destroyEntity(entity) {
-  entities.remove(entity.index);
+function destroyEntity(entitiesList, entity) {
+  entitiesList.remove(entity.index);
 }
 
 const keyCode = {
@@ -93,11 +94,8 @@ document.onkeyup = function (event) {
   }
 };
 
-const entityTypes = {};
-
 function addEntityType(mapSymbol, updateFunc, defaultState = {}) {
-  entityTypes[mapSymbol] = {
-    type: mapSymbol,
+  globalEntityTypes[mapSymbol] = {
     updateFunc,
     defaultState
   };
@@ -124,10 +122,10 @@ function updateGame() {
     -((camera.y - cameraHeight / 2) * settings.pixelsPerMeter)
   );
 
-  for (let index = 0; index < entities.items.length; index++) {
-    const entity = entities.items[index];
+  for (let index = 0; index < entitiesList.items.length; index++) {
+    const entity = entitiesList.items[index];
     if (entity !== utils.unorderedList.REMOVED_ITEM) {
-      const typeInfo = entityTypes[entity.type];
+      const typeInfo = globalEntityTypes[entity.type];
       if (typeInfo.updateFunc) {
         typeInfo.updateFunc(entity);
       }
@@ -166,8 +164,8 @@ function createMap(asciiMapRows) {
   for (let y = 0; y < asciiMapRows.length; y++) {
     const row = asciiMapRows[y];
     for (let x = 0; x < row.length; x++) {
-      if (entityTypes[row[x]]) {
-        const e = addEntity(row[x]);
+      if (globalEntityTypes[row[x]]) {
+        const e = addEntity(entitiesList, row[x]);
         e.x = x * settings.tileSize;
         e.y = y * settings.tileSize;
       }
@@ -176,7 +174,7 @@ function createMap(asciiMapRows) {
 }
 
 function checkCollision(entity, otherTypes, offsetX = 0, offsetY = 0) {
-  for (let other of entities.items) {
+  for (let other of entitiesList.items) {
     if (other !== utils.unorderedList.REMOVED_ITEM && entity !== other) {
       if (!otherTypes.includes(other.type)) {
         continue;
@@ -338,5 +336,6 @@ export default {
   time,
   camera,
   loadSound,
-  playSound
+  playSound,
+  entitiesList,
 };
