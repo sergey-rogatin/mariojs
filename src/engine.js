@@ -25,7 +25,7 @@ const time = {
 
 window.settings = settings;
 
-function addEntity(type) {
+function addEntity(entityType) {
   const entity = {
     x: 0,
     y: 0,
@@ -38,19 +38,14 @@ function addEntity(type) {
     speedX: 0,
     speedY: 0,
 
-    type,
+    type: entityType.type,
     index: 0,
     collisionIndex: 0
   };
 
-  const typeInfo = entityTypes[type];
-  Object.assign(entity, typeInfo.defaultState);
-
-  const index = entities.add(entity);
-  entity.index = index;
-
-  const collisionIndex = typeInfo.collisionList.add(entity);
-  entity.collisionIndex = collisionIndex;
+  Object.assign(entity, entityType.defaultState);
+  entity.index = entities.add(entity);
+  entity.collisionIndex = entityType.collisionList.add(entity);
 
   return entity;
 }
@@ -76,7 +71,7 @@ Object.values(keyCode).forEach(
   code => (keys[code] = { isDown: false, wentDown: false, wentUp: false })
 );
 
-document.onkeydown = function (event) {
+document.onkeydown = function(event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
@@ -87,7 +82,7 @@ document.onkeydown = function (event) {
   }
 };
 
-document.onkeyup = function (event) {
+document.onkeyup = function(event) {
   const key = keys[event.keyCode];
   if (!key) {
     return;
@@ -98,25 +93,23 @@ document.onkeyup = function (event) {
   }
 };
 
-const entityTypes = [];
-const dictSymbolToEntityType = {};
+const entityTypes = {};
 
 function addEntityType(mapSymbol, updateFunc, defaultState = {}) {
-  const type = entityTypes.length;
-  entityTypes.push({
+  entityTypes[mapSymbol] = {
+    type: mapSymbol,
     updateFunc,
     collisionList: utils.unorderedList(),
     defaultState
-  });
-  dictSymbolToEntityType[mapSymbol] = type;
-  return type;
+  };
+  return mapSymbol;
 }
 
 let prevTime = performance.now();
 
 const camera = {
   x: canvas.width / 2,
-  y: canvas.height / 2,
+  y: canvas.height / 2
 };
 
 function updateGame() {
@@ -174,9 +167,8 @@ function createMap(asciiMapRows) {
   for (let y = 0; y < asciiMapRows.length; y++) {
     const row = asciiMapRows[y];
     for (let x = 0; x < row.length; x++) {
-      const entityType = dictSymbolToEntityType[row[x]];
-      if (entityType !== undefined) {
-        const e = addEntity(entityType);
+      if (entityTypes[row[x]] !== undefined) {
+        const e = addEntity(entityTypes[row[x]]);
         e.x = x * settings.tileSize;
         e.y = y * settings.tileSize;
       }
@@ -291,7 +283,10 @@ function drawSprite(sprite, x, y, speed = 0, scaleX = 1, scaleY = 1) {
   }
 
   ctx.save();
-  ctx.scale(scaleX * settings.pixelsPerMeter / 16, scaleY * settings.pixelsPerMeter / 16);
+  ctx.scale(
+    scaleX * settings.pixelsPerMeter / 16,
+    scaleY * settings.pixelsPerMeter / 16
+  );
   ctx.drawImage(
     sprite.bitmap,
     currentFrame * sprite.width,
@@ -336,5 +331,5 @@ export default {
   time,
   camera,
   loadSound,
-  playSound,
+  playSound
 };
