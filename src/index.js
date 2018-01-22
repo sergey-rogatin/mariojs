@@ -16,21 +16,25 @@ import audioStomp from './sounds/stomp.wav';
 // TODO баг с анимацией (чем больше объектов с этим спрайтом на экране, тем быстрее анимация)
 
 const {
+  addEntityType,
+  addEntity,
+  removeEntity,
+  createMap,
+
   loadSprite,
   drawSprite,
-  addEntityType,
+
+  loadSound,
+  playSound,
+
   settings,
   keys,
   time,
   keyCode,
+  camera,
+
   moveAndCheckForObstacles,
   checkCollision,
-  addEntity,
-  removeEntity,
-  camera,
-  createMap,
-  loadSound,
-  playSound,
 } = engine;
 
 // загрузка спрайтов будет не в юзеркоде наверн

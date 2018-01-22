@@ -51,6 +51,7 @@ Object.values(globalKeyCode).forEach(
 mainGameLoop();
 
 
+// in user api, all global variables are passed implicitly
 const api = {
   settings: globalSettings,
   keyCode: globalKeyCode,
@@ -58,6 +59,7 @@ const api = {
   time: globalTimeInfo,
   camera: globalCamera,
 
+  // entities
   addEntityType: (mapSymbol, updateFunc, defaultState) =>
     addEntityType(globalEntityTypeInfo, mapSymbol, updateFunc, defaultState),
 
@@ -71,6 +73,7 @@ const api = {
     createMap(globalEntityTypeInfo, globalEntitiesList, globalSettings, asciiMapRows),
 
 
+  // drawing
   loadSprite,
 
   drawSprite: (sprite, entity, animationSpeed, scaleX, scaleY) =>
@@ -80,11 +83,13 @@ const api = {
     drawRect(globalCtx, x, y, width, height, color),
 
 
+  // audio
   loadSound,
 
   playSound,
 
 
+  // collision
   checkCollision: (entity, otherTypes, offsetX, offsetY) =>
     checkCollision(globalEntitiesList, entity, otherTypes, offsetX, offsetY),
 
