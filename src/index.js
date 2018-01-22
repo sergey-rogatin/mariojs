@@ -13,7 +13,6 @@ import audioJump from './sounds/jump.wav';
 import audioCoin from './sounds/coin.wav';
 import audioStomp from './sounds/stomp.wav';
 
-// TODO баг с анимацией (чем больше объектов с этим спрайтом на экране, тем быстрее анимация)
 
 const {
   addEntityType,
@@ -50,7 +49,7 @@ const sndMainTheme = loadSound(audioMainTheme);
 const sndJump = loadSound(audioJump);
 const sndCoin = loadSound(audioCoin);
 const sndStomp = loadSound(audioStomp);
-playSound(sndMainTheme, true);
+//playSound(sndMainTheme, true);
 
 
 function updateWall(wall) {
@@ -138,6 +137,7 @@ function updateMario(mario) {
       playSound(sndStomp);
     } else {
       removeEntity(mario);
+      // TODO: сделать меню после проигрыша
       const newMario = addEntity(ENTITY_TYPE_MARIO);
       newMario.x = playerStartX;
       newMario.y = playerStartY;
@@ -238,7 +238,7 @@ const asciiMapRows = [
   '      ###      0000                                       ',
   '##  #####      ####                                       ',
   '#                                                         ',
-  '        #  G                                              ',
+  '        #  G        GGGGGGGGGGGGGGGGGGG                   ',
   '#         ###                                             ',
   '#                                                         ',
   '  ?                                                       ',

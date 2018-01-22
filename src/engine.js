@@ -3,16 +3,16 @@ import utils from './utils';
 // canvas initialization
 const SCALING_FACTOR = 4;
 
-const globalCanvas = document.querySelector('#game');
-globalCanvas.style.imageRendering = 'pixelated';
-globalCanvas.width = 300;
-globalCanvas.height = 200;
-globalCanvas.style.width = globalCanvas.width * SCALING_FACTOR;
-globalCanvas.style.height = globalCanvas.height * SCALING_FACTOR;
-const globalCtx = globalCanvas.getContext('2d');
+const _canvas = document.querySelector('#game');
+_canvas.style.imageRendering = 'pixelated';
+_canvas.width = 300;
+_canvas.height = 200;
+_canvas.style.width = _canvas.width * SCALING_FACTOR;
+_canvas.style.height = _canvas.height * SCALING_FACTOR;
+const _ctx = _canvas.getContext('2d');
 
 // global variables
-const globalSettings = {
+const _settings = {
   pixelsPerMeter: 16,
   tileSize: 1,
   timeSpeed: 1,
@@ -22,29 +22,29 @@ const globalSettings = {
 const _entityTypesObj = {};
 const _entityList = utils.unorderedList();
 
-const globalKeyCode = {
+const _keyCode = {
   SPACE: 32,
   ARROW_LEFT: 37,
   ARROW_UP: 38,
   ARROW_RIGHT: 39,
   ARROW_DOWN: 40
 };
-const globalKeys = {};
+const _keys = {};
 
-const globalTimeInfo = {
+const _timeInfo = {
   deltaTime: 0,
   totalTime: 0,
   prevFrameTime: performance.now()
 };
 
-const globalCamera = {
-  x: globalCanvas.width / 2,
-  y: globalCanvas.height / 2
+const _camara = {
+  x: _canvas.width / 2,
+  y: _canvas.height / 2
 };
 
 // add all keys defined in keyCode to globalKeys object
-Object.values(globalKeyCode).forEach(
-  code => (globalKeys[code] = { isDown: false, wentDown: false, wentUp: false })
+Object.values(_keyCode).forEach(
+  code => (_keys[code] = { isDown: false, wentDown: false, wentUp: false })
 );
 
 // start the game
@@ -52,11 +52,11 @@ mainGameLoop();
 
 // in user api, all global variables are passed implicitly
 const api = {
-  settings: globalSettings,
-  keyCode: globalKeyCode,
-  keys: globalKeys,
-  time: globalTimeInfo,
-  camera: globalCamera,
+  settings: _settings,
+  keyCode: _keyCode,
+  keys: _keys,
+  time: _timeInfo,
+  camera: _camara,
 
   // entities
   addEntityType: (mapSymbol, updateFunc, defaultState) =>
@@ -67,16 +67,16 @@ const api = {
   removeEntity: entity => removeEntity(_entityList, entity),
 
   createMap: asciiMapRows =>
-    createMap(_entityTypesObj, _entityList, globalSettings, asciiMapRows),
+    createMap(_entityTypesObj, _entityList, _settings, asciiMapRows),
 
   // drawing
   loadSprite,
 
   drawSprite: (sprite, entity, animationSpeed, scaleX, scaleY) =>
-    drawSprite(globalCtx, sprite, entity, animationSpeed, scaleX, scaleY),
+    drawSprite(_ctx, sprite, entity, animationSpeed, scaleX, scaleY),
 
   drawRect: (x, y, width, height, color) =>
-    drawRect(globalCtx, x, y, width, height, color),
+    drawRect(_ctx, x, y, width, height, color),
 
   // audio
   loadSound,
@@ -88,7 +88,7 @@ const api = {
     checkCollision(_entityList, entity, otherTypes, offsetX, offsetY),
 
   moveAndCheckForObstacles: (entity, otherTypes) =>
-    moveAndCheckForObstacles(_entityList, globalTimeInfo, entity, otherTypes)
+    moveAndCheckForObstacles(_entityList, _timeInfo, entity, otherTypes)
 };
 
 export default api;
@@ -151,8 +151,8 @@ function createMap(entityTypesObj, entityList, globalSettings, asciiMapRows) {
 
 // keyboard input
 
-document.onkeydown = function(event) {
-  const key = globalKeys[event.keyCode];
+document.onkeydown = function (event) {
+  const key = _keys[event.keyCode];
   if (!key) {
     return;
   }
@@ -162,8 +162,8 @@ document.onkeydown = function(event) {
   }
 };
 
-document.onkeyup = function(event) {
-  const key = globalKeys[event.keyCode];
+document.onkeyup = function (event) {
+  const key = _keys[event.keyCode];
   if (!key) {
     return;
   }
@@ -176,13 +176,13 @@ document.onkeyup = function(event) {
 // timing and main game loop
 
 function mainGameLoop() {
-  globalCtx.fillStyle = '#444';
-  globalCtx.fillRect(0, 0, globalCanvas.width, globalCanvas.height);
+  _ctx.fillStyle = '#444';
+  _ctx.fillRect(0, 0, _canvas.width, _canvas.height);
 
-  globalCtx.save();
-  globalCtx.translate(
-    -(globalCamera.x * globalSettings.pixelsPerMeter - globalCanvas.width / 2),
-    -(globalCamera.y * globalSettings.pixelsPerMeter - globalCanvas.height / 2)
+  _ctx.save();
+  _ctx.translate(
+    -(_camara.x * _settings.pixelsPerMeter - _canvas.width / 2),
+    -(_camara.y * _settings.pixelsPerMeter - _canvas.height / 2)
   );
 
   for (let index = 0; index < _entityList.items.length; index++) {
@@ -195,22 +195,22 @@ function mainGameLoop() {
     }
   }
 
-  globalCtx.restore();
+  _ctx.restore();
 
   // clear keyboard inputs
-  Object.values(globalKeys).forEach(key => {
+  Object.values(_keys).forEach(key => {
     key.wentDown = false;
     key.wentUp = false;
   });
 
   const newTime = performance.now();
-  globalTimeInfo.deltaTime =
-    (newTime - globalTimeInfo.prevFrameTime) * 0.001 * globalSettings.timeSpeed;
-  if (globalTimeInfo.deltaTime > 0.1) {
-    globalTimeInfo.deltaTime = 0.016;
+  _timeInfo.deltaTime =
+    (newTime - _timeInfo.prevFrameTime) * 0.001 * _settings.timeSpeed;
+  if (_timeInfo.deltaTime > 0.1) {
+    _timeInfo.deltaTime = 0.016;
   }
-  globalTimeInfo.totalTime += globalTimeInfo.deltaTime;
-  globalTimeInfo.prevFrameTime = newTime;
+  _timeInfo.totalTime += _timeInfo.deltaTime;
+  _timeInfo.prevFrameTime = newTime;
   requestAnimationFrame(mainGameLoop);
 }
 
@@ -237,7 +237,7 @@ function loadSprite(fileName, offsetX = 0, offsetY = 0, frameCount = 1) {
 }
 
 function drawSprite(
-  globalCtx,
+  ctx,
   sprite,
   entity,
   animationSpeed = 0,
@@ -254,29 +254,29 @@ function drawSprite(
   }
   sprite.entityFrameMap.set(entity, savedFrame);
 
-  globalCtx.save();
-  globalCtx.scale(scaleX, scaleY);
-  globalCtx.drawImage(
+  ctx.save();
+  ctx.scale(scaleX, scaleY);
+  ctx.drawImage(
     sprite.bitmap,
     currentFrame * sprite.width,
     0,
     sprite.width,
     sprite.height,
-    entity.x * scaleX * globalSettings.pixelsPerMeter + sprite.offsetX,
-    entity.y * scaleY * globalSettings.pixelsPerMeter + sprite.offsetY,
+    entity.x * scaleX * _settings.pixelsPerMeter + sprite.offsetX,
+    entity.y * scaleY * _settings.pixelsPerMeter + sprite.offsetY,
     sprite.width,
     sprite.height
   );
-  globalCtx.restore();
+  ctx.restore();
 }
 
-function drawRect(globalCtx, x, y, width, height, color) {
-  globalCtx.fillStyle = color;
-  globalCtx.fillRect(
-    x * globalSettings.pixelsPerMeter,
-    y * globalSettings.pixelsPerMeter,
-    width * globalSettings.pixelsPerMeter,
-    height * globalSettings.pixelsPerMeter
+function drawRect(ctx, x, y, width, height, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(
+    x * _settings.pixelsPerMeter,
+    y * _settings.pixelsPerMeter,
+    width * _settings.pixelsPerMeter,
+    height * _settings.pixelsPerMeter
   );
 }
 
@@ -300,13 +300,13 @@ function playSound(sound, loop = false, volume = 0.02) {
 function checkCollision(
   entityList,
   entity,
-  otherTypes,
+  otherEntityTypes,
   offsetX = 0,
   offsetY = 0
 ) {
   for (let other of entityList.items) {
     if (other !== utils.unorderedList.REMOVED_ITEM && entity !== other) {
-      if (!otherTypes.includes(other.type)) {
+      if (!otherEntityTypes.includes(other.type)) {
         continue;
       }
       const eLeft = entity.x + offsetX + entity.bbox.left;
@@ -338,7 +338,7 @@ function checkCollision(
 
 function moveAndCheckForObstacles(
   entityList,
-  globalTimeInfo,
+  time,
   entity,
   otherTypes
 ) {
@@ -346,7 +346,7 @@ function moveAndCheckForObstacles(
     entityList,
     entity,
     otherTypes,
-    entity.speedX * globalTimeInfo.deltaTime,
+    entity.speedX * time.deltaTime,
     0
   );
   if (horizWall) {
@@ -370,8 +370,8 @@ function moveAndCheckForObstacles(
     _entityList,
     entity,
     otherTypes,
-    entity.speedX * globalTimeInfo.deltaTime,
-    entity.speedY * globalTimeInfo.deltaTime
+    entity.speedX * time.deltaTime,
+    entity.speedY * time.deltaTime
   );
   if (vertWall) {
     if (entity.speedY > 0) {
@@ -385,8 +385,8 @@ function moveAndCheckForObstacles(
     }
   }
 
-  entity.x += entity.speedX * globalTimeInfo.deltaTime;
-  entity.y += entity.speedY * globalTimeInfo.deltaTime;
+  entity.x += entity.speedX * time.deltaTime;
+  entity.y += entity.speedY * time.deltaTime;
 
   return { horizWall, vertWall };
 }
