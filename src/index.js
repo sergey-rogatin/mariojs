@@ -26,12 +26,11 @@ const {
   moveAndCheckForObstacles,
   checkCollision,
   addEntity,
-  destroyEntity,
+  removeEntity,
   camera,
   createMap,
   loadSound,
   playSound,
-  entitiesList,
 } = engine;
 
 // загрузка спрайтов будет не в юзеркоде наверн
@@ -121,7 +120,7 @@ function updateMario(mario) {
 
   // question blocks
   if (vertWall && vertWall.type === ENTITY_TYPE_QUESTION_BLOCK && vertWall.y < mario.y) {
-    const coin = addEntity(entitiesList, ENTITY_TYPE_COIN);
+    const coin = addEntity(ENTITY_TYPE_COIN);
     coin.x = vertWall.x;
     coin.y = vertWall.y - settings.tileSize;
     coin.isFlying = true;
@@ -130,27 +129,27 @@ function updateMario(mario) {
   const hitEnemy = checkCollision(mario, [ENTITY_TYPE_GOOMBA]);
   if (hitEnemy) {
     if (hitEnemy.y > mario.y) {
-      destroyEntity(entitiesList, hitEnemy);
+      removeEntity(hitEnemy);
       mario.speedY = -15;
       playSound(sndStomp);
     } else {
-      destroyEntity(entitiesList, mario);
-      const newMario = addEntity(entitiesList, ENTITY_TYPE_MARIO);
+      removeEntity(mario);
+      const newMario = addEntity(ENTITY_TYPE_MARIO);
       newMario.x = playerStartX;
       newMario.y = playerStartY;
     }
   }
 
   if (mario.y > 30) {
-    destroyEntity(entitiesList, mario);
-    const newMario = addEntity(entitiesList, ENTITY_TYPE_MARIO);
+    removeEntity(mario);
+    const newMario = addEntity(ENTITY_TYPE_MARIO);
     newMario.x = playerStartX;
     newMario.y = playerStartY;
   }
 
   const hitCoin = checkCollision(mario, [ENTITY_TYPE_COIN]);
   if (hitCoin) {
-    destroyEntity(entitiesList, hitCoin);
+    removeEntity(hitCoin);
     playSound(sndCoin);
   }
 
@@ -202,7 +201,7 @@ function updateCoin(coin) {
   if (coin.isFlying) {
     coin.y -= 4 * time.deltaTime;
     if (coin.y < coin.startY - 1) {
-      destroyEntity(entitiesList, coin);
+      removeEntity(coin);
     }
   }
 }

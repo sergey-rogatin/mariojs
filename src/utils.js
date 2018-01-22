@@ -1,13 +1,3 @@
-/**
- * returns the middle of three numbers
- * @param {number} a
- * @param {number} b
- * @param {number} c
- */
-function averageOfThree(a, b, c) {
-  return a > b === a < c ? a : b > a === b < c ? b : c;
-}
-
 function unorderedList() {
   return {
     items: [],
@@ -29,6 +19,5 @@ function unorderedList() {
 unorderedList.REMOVED_ITEM = Symbol('REMOVED_ITEM');
 
 export default {
-  averageOfThree,
   unorderedList
 };
