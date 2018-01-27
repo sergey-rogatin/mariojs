@@ -1,0 +1,10 @@
+{
+  "entry": "src/index.js",
+  "templateHTML": "index.html",
+  "bundleDir": "dist",
+  "watchFiles": true,
+  "devServer": {
+    "enable": true,
+    "port": 8080
+  }
+}

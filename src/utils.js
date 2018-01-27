@@ -14,7 +14,7 @@ function unorderedList() {
       this.freeSpaces.push(index);
       this.items[index] = unorderedList.REMOVED_ITEM;
     }
-  };
+  }; 
 }
 unorderedList.REMOVED_ITEM = Symbol('REMOVED_ITEM');
 
