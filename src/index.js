@@ -8,7 +8,7 @@ import imgCoin from './sprites/coin.png';
 import imgGoomba from './sprites/goomba.png';
 import imgQuestionBlock from './sprites/questionBlock.png';
 
-import audioMainTheme from './sounds/mainTheme.mp3';
+// import audioMainTheme from './sounds/mainTheme.mp3';
 import audioJump from './sounds/jump.wav';
 import audioCoin from './sounds/coin.wav';
 import audioStomp from './sounds/stomp.wav';
@@ -45,7 +45,7 @@ const sprGoomba = loadSprite(imgGoomba, -8, -16, 2);
 const sprCoin = loadSprite(imgCoin, 0, 0, 2);
 const sprQuestionBlock = loadSprite(imgQuestionBlock, 0, 0, 1);
 
-const sndMainTheme = loadSound(audioMainTheme);
+// const sndMainTheme = loadSound(audioMainTheme);
 const sndJump = loadSound(audioJump);
 const sndCoin = loadSound(audioCoin);
 const sndStomp = loadSound(audioStomp);
@@ -248,3 +248,4 @@ const asciiMapRows = [
 ];
 
 createMap(asciiMapRows);
+ 
