@@ -50,48 +50,52 @@ Object.values(_keyCode).forEach(
 // start the game
 mainGameLoop();
 
+// define api functions
+const apiAddEntityType = (mapSymbol, updateFunc, defaultState) =>
+  addEntityType(_entityTypesObj, mapSymbol, updateFunc, defaultState);
+
+const apiAddEntity = type => addEntity(_entityTypesObj, _entityList, type);
+
+const apiRemoveEntity = entity => removeEntity(_entityList, entity);
+
+const apiCreateMap = asciiMapRows =>
+  createMap(_entityTypesObj, _entityList, _settings, asciiMapRows);
+
+const apiDrawSprite = (sprite, entity, animationSpeed, scaleX, scaleY) =>
+  drawSprite(_ctx, sprite, entity, animationSpeed, scaleX, scaleY);
+
+const apiDrawRect = (x, y, width, height, color) =>
+  drawRect(_ctx, x, y, width, height, color);
+
+const apiCheckCollision = (entity, otherTypes, offsetX, offsetY) =>
+  checkCollision(_entityList, entity, otherTypes, offsetX, offsetY);
+
+const apiMoveAndCheckForObstacles = (entity, otherTypes) =>
+  moveAndCheckForObstacles(_entityList, _timeInfo, entity, otherTypes);
+
 // in user api, all global variables are passed implicitly
-const api = {
-  settings: _settings,
-  keyCode: _keyCode,
-  keys: _keys,
-  time: _timeInfo,
-  camera: _camara,
-
+export {
+  _settings as settings,
+  _keyCode as keyCode,
+  _keys as keys,
+  _timeInfo as time,
+  _camara as camera,
   // entities
-  addEntityType: (mapSymbol, updateFunc, defaultState) =>
-    addEntityType(_entityTypesObj, mapSymbol, updateFunc, defaultState),
-
-  addEntity: type => addEntity(_entityTypesObj, _entityList, type),
-
-  removeEntity: entity => removeEntity(_entityList, entity),
-
-  createMap: asciiMapRows =>
-    createMap(_entityTypesObj, _entityList, _settings, asciiMapRows),
-
+  apiAddEntityType as addEntityType,
+  apiAddEntity as addEntity,
+  apiRemoveEntity as removeEntity,
+  apiCreateMap as createMap,
   // drawing
   loadSprite,
-
-  drawSprite: (sprite, entity, animationSpeed, scaleX, scaleY) =>
-    drawSprite(_ctx, sprite, entity, animationSpeed, scaleX, scaleY),
-
-  drawRect: (x, y, width, height, color) =>
-    drawRect(_ctx, x, y, width, height, color),
-
+  apiDrawSprite as drawSprite,
+  apiDrawRect as drawRect,
   // audio
   loadSound,
-
   playSound,
-
   // collision
-  checkCollision: (entity, otherTypes, offsetX, offsetY) =>
-    checkCollision(_entityList, entity, otherTypes, offsetX, offsetY),
-
-  moveAndCheckForObstacles: (entity, otherTypes) =>
-    moveAndCheckForObstacles(_entityList, _timeInfo, entity, otherTypes)
+  apiCheckCollision as checkCollision,
+  apiMoveAndCheckForObstacles as moveAndCheckForObstacles
 };
-
-export default api;
 
 // entities
 function addEntityType(
@@ -151,7 +155,7 @@ function createMap(entityTypesObj, entityList, globalSettings, asciiMapRows) {
 
 // keyboard input
 
-document.onkeydown = function (event) {
+document.onkeydown = function(event) {
   const key = _keys[event.keyCode];
   if (!key) {
     return;
@@ -162,7 +166,7 @@ document.onkeydown = function (event) {
   }
 };
 
-document.onkeyup = function (event) {
+document.onkeyup = function(event) {
   const key = _keys[event.keyCode];
   if (!key) {
     return;
@@ -336,12 +340,7 @@ function checkCollision(
   return null;
 }
 
-function moveAndCheckForObstacles(
-  entityList,
-  time,
-  entity,
-  otherTypes
-) {
+function moveAndCheckForObstacles(entityList, time, entity, otherTypes) {
   const horizWall = checkCollision(
     entityList,
     entity,
