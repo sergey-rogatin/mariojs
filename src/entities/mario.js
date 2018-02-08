@@ -1,6 +1,4 @@
 import audioJump from '../sounds/jump.wav';
-import audioCoin from '../sounds/coin.wav';
-import audioStomp from '../sounds/stomp.wav';
 import imgMarioRunning from '../sprites/marioRunning.png';
 import imgMarioIdle from '../sprites/marioIdle.png';
 import imgMarioJumping from '../sprites/marioJumping.png';
@@ -34,8 +32,6 @@ const sprMarioJumping = loadSprite(imgMarioJumping, -8, -16);
 const sprMarioIdle = loadSprite(imgMarioIdle, -8, -16);
 
 const sndJump = loadSound(audioJump);
-const sndCoin = loadSound(audioCoin);
-const sndStomp = loadSound(audioStomp);
 
 export const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
   bbox: {
@@ -61,13 +57,6 @@ export function updateMario(mario) {
 
   // Рисуем спрайт марио на экране
   drawSprite(sprMarioIdle, mario, 0, dir);
-
-  // Собираем монетки
-  const hitCoin = checkCollision(mario, [ENTITY_TYPE_COIN]);
-  if (hitCoin) {
-    removeEntity(hitCoin);
-    playSound(sndCoin);
-  }
 
   // Двигаемся, если игрок нажимает на клавиши
   const keyLeft = keys[keyCode.ARROW_LEFT];
@@ -96,34 +85,10 @@ export function updateMario(mario) {
   ]);
   mario.isOnGround = Boolean(vertWall && vertWall.y <= mario.y);
 
+  // прыгаем
   if (keySpace.wentDown && mario.isOnGround) {
     mario.speedY = -12;
     playSound(sndJump);
-  }
-
-  // if (
-  //   vertWall &&
-  //   vertWall.type === ENTITY_TYPE_QUESTION_BLOCK &&
-  //   vertWall.y < mario.y
-  // ) {
-  //   const coin = addEntity(ENTITY_TYPE_COIN);
-  //   coin.x = vertWall.x;
-  //   coin.y = vertWall.y - settings.tileSize;
-  //   coin.isFlying = true;
-  // }
-
-  const hitEnemy = checkCollision(mario, [ENTITY_TYPE_GOOMBA]);
-  if (hitEnemy) {
-    if (hitEnemy.y > mario.y) {
-      removeEntity(hitEnemy);
-      mario.speedY = -15;
-      playSound(sndStomp);
-    } else {
-      removeEntity(mario);
-      const newMario = addEntity(ENTITY_TYPE_MARIO);
-      newMario.x = mario.startX;
-      newMario.y = mario.startY;
-    }
   }
 
   // Создаем марио заново, если он упал за пределы экрана

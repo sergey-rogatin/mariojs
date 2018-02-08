@@ -37,9 +37,11 @@ const _timeInfo = {
   prevFrameTime: performance.now()
 };
 
-const _camara = {
-  x: _canvas.width / 2,
-  y: _canvas.height / 2
+const _camera = {
+  x: _canvas.width / 2 / _settings.pixelsPerMeter,
+  y: _canvas.height / 2 / _settings.pixelsPerMeter,
+  width: _canvas.width / _settings.pixelsPerMeter,
+  height: _canvas.height / _settings.pixelsPerMeter
 };
 
 // add all keys defined in keyCode to globalKeys object
@@ -73,13 +75,15 @@ const apiCheckCollision = (entity, otherTypes, offsetX, offsetY) =>
 const apiMoveAndCheckForObstacles = (entity, otherTypes) =>
   moveAndCheckForObstacles(_entityList, _timeInfo, entity, otherTypes);
 
+const apiDrawText = (text, x, y, color) => drawText(_ctx, text, x, y, color);
+
 // in user api, all global variables are passed implicitly
 export {
   _settings as settings,
   _keyCode as keyCode,
   _keys as keys,
   _timeInfo as time,
-  _camara as camera,
+  _camera as camera,
   // entities
   apiAddEntityType as addEntityType,
   apiAddEntity as addEntity,
@@ -94,7 +98,8 @@ export {
   playSound,
   // collision
   apiCheckCollision as checkCollision,
-  apiMoveAndCheckForObstacles as moveAndCheckForObstacles
+  apiMoveAndCheckForObstacles as moveAndCheckForObstacles,
+  apiDrawText as drawText
 };
 
 // entities
@@ -180,13 +185,16 @@ document.onkeyup = function(event) {
 // timing and main game loop
 
 function mainGameLoop() {
+  _camera.width = _canvas.width / _settings.pixelsPerMeter;
+  _camera.height = _canvas.height / _settings.pixelsPerMeter;
+
   _ctx.fillStyle = '#444';
   _ctx.fillRect(0, 0, _canvas.width, _canvas.height);
 
   _ctx.save();
   _ctx.translate(
-    -(_camara.x * _settings.pixelsPerMeter - _canvas.width / 2),
-    -(_camara.y * _settings.pixelsPerMeter - _canvas.height / 2)
+    -(_camera.x * _settings.pixelsPerMeter - _canvas.width / 2),
+    -(_camera.y * _settings.pixelsPerMeter - _canvas.height / 2)
   );
 
   for (let index = 0; index < _entityList.items.length; index++) {
@@ -258,16 +266,18 @@ function drawSprite(
   }
   sprite.entityFrameMap.set(entity, savedFrame);
 
+  const factor = _settings.pixelsPerMeter / 16;
+
   ctx.save();
-  ctx.scale(scaleX, scaleY);
+  ctx.scale(scaleX * factor, scaleY * factor);
   ctx.drawImage(
     sprite.bitmap,
     currentFrame * sprite.width,
     0,
     sprite.width,
     sprite.height,
-    entity.x * scaleX * _settings.pixelsPerMeter + sprite.offsetX,
-    entity.y * scaleY * _settings.pixelsPerMeter + sprite.offsetY,
+    entity.x * scaleX * 16 + sprite.offsetX,
+    entity.y * scaleY * 16 + sprite.offsetY,
     sprite.width,
     sprite.height
   );
@@ -388,4 +398,14 @@ function moveAndCheckForObstacles(entityList, time, entity, otherTypes) {
   entity.y += entity.speedY * time.deltaTime;
 
   return { horizWall, vertWall };
+}
+
+function drawText(ctx, text, x, y, color) {
+  ctx.fillStyle = color;
+  ctx.font = '20px Visitor';
+  ctx.fillText(
+    text,
+    (x + _camera.x) * _settings.pixelsPerMeter,
+    (y + _camera.y) * _settings.pixelsPerMeter
+  );
 }
