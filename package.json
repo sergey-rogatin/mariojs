@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "parcel index.html"
+    "start": "go-bundler bundler-config.json"
   },
   "author": "",
   "license": "ISC",
@@ -11,7 +11,6 @@
   "devDependencies": {
     "babel-preset-env": "^1.6.1",
     "eslint": "^4.17.0",
-    "go-bundler": "0.0.8",
-    "parcel-bundler": "^1.5.1"
+    "go-bundler": "0.0.9"
   }
 }

@@ -402,7 +402,7 @@ function moveAndCheckForObstacles(entityList, time, entity, otherTypes) {
 
 function drawText(ctx, text, x, y, color) {
   ctx.fillStyle = color;
-  ctx.font = '20px Visitor';
+  ctx.font = '50px Visitor';
   ctx.fillText(
     text,
     (x + _camera.x) * _settings.pixelsPerMeter,
