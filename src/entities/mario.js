@@ -1,38 +1,3 @@
-import audioJump from '../sounds/jump.wav';
-import imgMarioRunning from '../sprites/marioRunning.png';
-import imgMarioIdle from '../sprites/marioIdle.png';
-import imgMarioJumping from '../sprites/marioJumping.png';
-
-import {
-  ENTITY_TYPE_WALL,
-  ENTITY_TYPE_QUESTION_BLOCK,
-  ENTITY_TYPE_COIN,
-  ENTITY_TYPE_GOOMBA
-} from '../entityTypes';
-
-import {
-  loadSprite,
-  loadSound,
-  addEntityType,
-  drawSprite,
-  keys,
-  keyCode,
-  time,
-  settings,
-  addEntity,
-  moveAndCheckForObstacles,
-  playSound,
-  removeEntity,
-  camera,
-  checkCollision
-} from '../engine/engine';
-
-const sprMarioRunning = loadSprite(imgMarioRunning, -8, -16, 2);
-const sprMarioJumping = loadSprite(imgMarioJumping, -8, -16);
-const sprMarioIdle = loadSprite(imgMarioIdle, -8, -16);
-
-const sndJump = loadSound(audioJump);
-
 export const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
   bbox: {
     left: -0.45,

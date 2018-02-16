@@ -1,10 +1,11 @@
-import { camera, drawText, addEntity, addEntityType } from '../engine/engine';
+const ENTITY_TYPE_SCORE = addEntityType('%', updateScore);
 
 function updateScore(score) {
   if (!score.isInitialized) {
     score.isInitialized = true;
     score.count = 0;
   }
+  // Весь код ниже выполняется каждый кадр
   drawText(
     score.count,
     -camera.width / 2 + 0.5,
@@ -13,5 +14,4 @@ function updateScore(score) {
   );
 }
 
-const ENTITY_TYPE_SCORE = addEntityType('%', updateScore);
 export const scoreEntity = addEntity(ENTITY_TYPE_SCORE);

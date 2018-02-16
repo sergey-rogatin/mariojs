@@ -102,6 +102,25 @@ export {
   apiDrawText as drawText
 };
 
+Object.assign(window, {
+  settings: _settings,
+  keyCode: _keyCode,
+  keys: _keys,
+  time: _timeInfo,
+  camera: _camera,
+  addEntityType: apiAddEntityType,
+  addEntity: apiAddEntity,
+  createMap: apiCreateMap,
+  loadSprite,
+  drawSprite: apiDrawSprite,
+  drawRect: apiDrawRect,
+  loadSound,
+  playSound,
+  checkCollision: apiCheckCollision,
+  moveAndCheckForObstacles: apiMoveAndCheckForObstacles,
+  drawText: apiDrawText
+});
+
 // entities
 function addEntityType(
   entityTypesObj,
