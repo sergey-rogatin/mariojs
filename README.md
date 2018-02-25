@@ -11,12 +11,17 @@
 * Добавлять в игру звуки
 
 ## Подготовка к работе
+Чтобы скачать и установить движок: <br/>
+`git clone https://github.com/lvl5hm/mariojs` <br/>
+`cd mariojs` <br/>
+`npm install` <br/> <br/>
+
 Для работы вам понадобится веб-браузер (например, *Google Chrome*), консоль (например, *cmd* или *powershell*) и текстовый редактор. Вы можете выбрать любой редактор на ваш вкус (даже блокнот подойдет), но я рекомендую *Visual Studio Code*, так как он поддерживает многие часто используемые фичи 'из коробки' и не требует особой настройки.
 
 * Откройте папку Mario.JS в консоли. **Вся дальнейшая работа будет происходить в ней**
 * Чтобы сделать это в Visual Studio Code:
     * Откройте приложение
-    * Файл -> Открыть папку -> выберите папку MarioJS -> Выбор папки
+    * Файл -> Открыть папку -> выберите папку mariojs -> Выбор папки
     * Нажмите `ctrl + ~`
 * Введите команду `npm start`
 * Откройте браузер и перейдите по адресу `localhost:8080`
@@ -43,7 +48,7 @@ const asciiMapRows = [
 	 '#############  ###   #####################################'
 ];
 ```
-В этих строках каждый символ означает какую-либо игровую сущность, а пробел - ее отсутствие. Символ **#** означает кирпичный блок ( стену). При запуске игры движок считывает символы по порядку и создает уровень в игре. Попробуйте добавить или удалить блоки, отредактировав строки *asciiMapRows*. Чтобы проверить свои изменения, перезагрузите вкладку в браузере (`F5`).
+В этих строках каждый символ означает какую-либо игровую сущность, а пробел - ее отсутствие. Символ **#** означает кирпичный блок ( стену). При запуске игры движок считывает символы по порядку и создает уровень в игре. Попробуйте добавить или удалить блоки, отредактировав строки *asciiMapRows*. Чтобы проверить свои изменения сохраните файл `ctrl + F`.
 
 Символ **@** означает персонажа игрока. Вставьте его в уровень и проверьте, что Марио появился в игре:
 ```javascript
@@ -68,7 +73,7 @@ const asciiMapRows = [
 //#region imports...
 
 export function updateMario(mario) {
-	drawSprite(assets.sprMarioIdle, mario);
+    drawSprite(assets.sprMarioIdle, mario);
 }
 ```
 Когда игра запущена, функция `updateMario` выполняется  каждый кадр и рисует спрайт Марио на экране с помощью функции `drawSprite`.
@@ -84,8 +89,8 @@ export function updateMario(mario) {
  * @param {number} scaleY: Масштаб по оси y
  */
 function drawSprite(
-	sprite, entity,
-	animationSpeed = 0, scaleX = 1, scaleY = 1,
+    sprite, entity,
+    animationSpeed = 0, scaleX = 1, scaleY = 1,
 ) {...}
 ```
 Параметры `animationSpeed`, `scaleX` и `scaleY` опциональны, так как у них есть значения по умолчанию.
@@ -95,13 +100,13 @@ ___
 __*Измененные строчки отмечены знаком* >. *Этот символ вводить не надо.*__ 
 ```javascript
 export function updateMario(mario) {
-	drawSprite(assets.sprMarioIdle, mario);
+    drawSprite(assets.sprMarioIdle, mario);
 >   mario.x += 10 * time.deltaTime;
 }
 ```
 Значение `time.deltaTime` означает промежуток времени, прошедший за один кадр. Если интересно, зачем оно нужно, спросите меня =)
 
-Теперь каждый кадр `mario.x` будет увеличиваться на небольшое значение. Перезагрузите страницу `F5` и посмотрите, что получилось. Попробуйте вместо `10` вставить `-10`.
+Теперь каждый кадр `mario.x` будет увеличиваться на небольшое значение. Сохраните изменения и посмотрите, что получилось. Попробуйте вместо `10` вставить `-10`.
 ___
 
 Теперь давайте сделаем, чтобы игрок мог управлять движением Марио. Для этого в движке есть специальный массив `keys`, в котором хранится информация о нажатых в данный кадр клавишах. Чтобы получить доступ к нужной клавише, используется объект `keyCode`, который содержит коды клавиш, используемых в игре:
@@ -118,7 +123,7 @@ const keyRight = keys[keyCode.ARROW_RIGHT];
 Теперь мы можем управлять движением Марио с помощью условного оператора `if`:
 ```javascript
 export function updateMario(mario) {
-	drawSprite(assets.sprMarioIdle, mario);
+    drawSprite(assets.sprMarioIdle, mario);
 	
 >   const keyRight = keys[keyCode.ARROW_RIGHT];
 >   if (keyRight.isDown) {
@@ -132,7 +137,7 @@ export function updateMario(mario) {
   <summary>Решение</summary>
 
     export function updateMario(mario) {
-      drawSprite(assets.sprMarioIdle, mario);
+        drawSprite(assets.sprMarioIdle, mario);
 
         const keyRight = keys[keyCode.ARROW_RIGHT];
         if (keyRight.isDown) {
@@ -151,7 +156,7 @@ ___
 Как мы знаем из физики, под воздействием силы тяжести объекты движутся с ускорением, направленным вниз, то есть их скорость постоянно увеличивается. Чтобы симулировать это, мы каждый кадр будем увеличивать скорость Марио на константу `settings.gravity`:
 ```javascript
 export function updateMario(mario) {
-	drawSprite(assets.sprMarioIdle, mario);
+    drawSprite(assets.sprMarioIdle, mario);
 	
     const keyRight = keys[keyCode.ARROW_RIGHT];
     if (keyRight.isDown) {
@@ -162,7 +167,7 @@ export function updateMario(mario) {
         mario.x -= 10 * time.deltaTime;
     }
 	
->	mario.speedY += settings.gravity * time.deltaTime;
+>   mario.speedY += settings.gravity * time.deltaTime;
 >   mario.y += mario.speedY * time.deltaTime;
 }
 ```
@@ -185,13 +190,13 @@ function moveAndCheckForObstacles(entity, otherTypes) {...}
 Изменим нашу функцию `updateMario`. Теперь мы не будем изменять координаты `mario.x` и `mario.y` напрямую, а будем только управлять его скоростью `mario.speedX` и `mario.speedY` и позволим функции `moveAndCheckForObstacles` сделать остальное:
 ```javascript
 export function updateMario(mario) {
-	drawSprite(assets.sprMarioIdle, mario);
+    drawSprite(assets.sprMarioIdle, mario);
 	
 >   const keyRight = keys[keyCode.ARROW_RIGHT];
 >   const keyLeft = keys[keyCode.ARROW_LEFT];
 
->	mario.speedX = (keyRight.isDown - keyLeft.isDown) * 5;
->	mario.speedY += settings.gravity * time.deltaTime;
+>   mario.speedX = (keyRight.isDown - keyLeft.isDown) * 5;
+>   mario.speedY += settings.gravity * time.deltaTime;
 
 >   moveAndCheckForObstacles(mario, [ENTITY_TYPE_WALL]);    
 }
@@ -212,7 +217,7 @@ const { horizWall, vertWall } = moveAndCheckForObstacles(mario, [ENTITY_TYPE_WAL
 Если в данном кадре не произошло коллизии по вертикали или горизонтали, `horizWall` или `vertWall` соответственно будут равны `null`. То есть, если Марио стоит на земле, `vertWall` будет не равен `null`.
 ```javascript
 export function updateMario(mario) {
-	drawSprite(assets.sprMarioIdle, mario);
+    drawSprite(assets.sprMarioIdle, mario);
 
     const keyRight = keys[keyCode.ARROW_RIGHT];
     const keyLeft = keys[keyCode.ARROW_LEFT];
@@ -233,7 +238,7 @@ ___
 И давайте теперь добавим код, чтобы камера следовала за Марио:
 ```javascript
 export function updateMario(mario) {
-	drawSprite(assets.sprMarioIdle, mario);
+    drawSprite(assets.sprMarioIdle, mario);
 
     const keyRight = keys[keyCode.ARROW_RIGHT];
     const keyLeft = keys[keyCode.ARROW_LEFT];
@@ -249,7 +254,7 @@ export function updateMario(mario) {
     const { horizWall, vertWall } = moveAndCheckForObstacles(mario, [ENTITY_TYPE_WALL]);
     mario.isOnGround = vertWall !== null;
 	
->	camera.x = mario.x;
+>   camera.x = mario.x;
 }
 ```
 Готово! Теперь у нас есть полноценный игровой персонаж.
@@ -278,7 +283,7 @@ export function updateMario(mario) {
     const { horizWall, vertWall } = moveAndCheckForObstacles(mario, [ENTITY_TYPE_WALL]);
     mario.isOnGround = vertWall !== null;
 	
-	camera.x = mario.x;
+    camera.x = mario.x;
 }
 ```
 **Самостоятельное задание**: нужно изменять значение `mario.direction` на **1**, если была нажата клавиша **->**, и на **-1**, если **<-**.
@@ -413,10 +418,10 @@ export function updateGoomba(goomba) {
 Добавим в начало функции сегмент, который будет выполняться не каждый кадр, а лишь однажды, в начале игры. В этом сегменте мы сможем задать начальные параметры сущности, например, начальную скорость:
 ```javascript
 export function updateGoomba(goomba) {
->	if (!goomba.isInit) {
->		goomba.speedX = 2;
->		goomba.isInit = true;
->	}
+>   if (!goomba.isInit) {
+>       goomba.speedX = 2;
+>       goomba.isInit = true;
+>   }
 
     drawSprite(assets.sprGoomba, goomba, 0.1);
     
@@ -437,17 +442,17 @@ ___
 <details> 
   <summary>Решение</summary>
 
-    export function updateGoomba(goomba) {
+    	export function updateGoomba(goomba) {
 	    if (!goomba.isInit) {
-	        goomba.speedX = 2;
-	        goomba.isInit = true;
+		goomba.speedX = 2;
+		goomba.isInit = true;
 	    }
 
 	    drawSprite(assets.sprGoomba, goomba, 0.1);
 
 	    goomba.speedY += settings.gravity * time.deltaTime;
 	    const { horizWall, vertWall } = moveAndCheckForObstacles(goomba, [
-	        ENTITY_TYPE_WALL
+		ENTITY_TYPE_WALL
 	    ]);
 
 	>   if (horizWall !== null) {
@@ -492,7 +497,7 @@ function removeEntity(entity) {...}
 <details> 
   <summary>Решение</summary>
 
-    export function updateGoomba(goomba) {
+    	export function updateGoomba(goomba) {
 	    if (!goomba.isInit) {
 	        goomba.speedX = 2;
 	        goomba.isInit = true;
