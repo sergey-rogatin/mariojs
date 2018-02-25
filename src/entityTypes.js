@@ -1,13 +1,41 @@
-import { ENTITY_TYPE_GOOMBA } from './entities/goomba';
-import { ENTITY_TYPE_MARIO } from './entities/mario';
-import { ENTITY_TYPE_WALL } from './entities/wall';
-import { ENTITY_TYPE_COIN } from './entities/coin';
-import { ENTITY_TYPE_QUESTION_BLOCK } from './entities/questionBlock';
+import { addEntityType, settings } from './engine/engine';
+import { updateMario } from './entities/mario';
+import { updateWall } from './entities/wall';
+import { updateGoomba } from './entities/goomba';
+import { updateCoin } from './entities/coin';
 
-Object.assign(window, {
-  ENTITY_TYPE_COIN,
-  ENTITY_TYPE_GOOMBA,
-  ENTITY_TYPE_WALL,
-  ENTITY_TYPE_MARIO,
-  ENTITY_TYPE_QUESTION_BLOCK
+export const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
+    bbox: {
+        left: -0.5,
+        top: 0,
+        width: 1,
+        height: 1
+    }
+});
+
+export const ENTITY_TYPE_WALL = addEntityType('#', updateWall, {
+    bbox: {
+        left: 0,
+        top: 0,
+        width: settings.tileSize,
+        height: settings.tileSize
+    }
+});
+
+export const ENTITY_TYPE_GOOMBA = addEntityType('G', updateGoomba, {
+    bbox: {
+        left: -0.5,
+        top: 0,
+        width: 1,
+        height: 1
+    }
+});
+
+export const ENTITY_TYPE_COIN = addEntityType('0', updateCoin, {
+    bbox: {
+        left: 0,
+        top: 0,
+        width: 1,
+        height: 1
+    }
 });

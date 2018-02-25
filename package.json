@@ -1,16 +1,19 @@
 {
-  "name": "gamelesson",
-  "version": "1.0.0",
-  "description": "",
-  "scripts": {
-    "start": "go-bundler bundler-config.json"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {},
-  "devDependencies": {
-    "babel-preset-env": "^1.6.1",
-    "eslint": "^4.17.0",
-    "go-bundler": "^0.1.2"
-  }
+    "name": "gamelesson",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "start": "webpack-dev-server"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {},
+    "devDependencies": {
+        "babel-preset-env": "^1.6.1",
+        "eslint": "^4.17.0",
+        "file-loader": "^1.1.9",
+        "webpack": "^4.0.0",
+        "webpack-cli": "^2.0.9",
+        "webpack-dev-server": "^3.0.0"
+    }
 }

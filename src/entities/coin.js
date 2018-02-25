@@ -1,15 +1,24 @@
-import { scoreEntity } from './score';
+//#region imports
+import {
+    addEntityType,
+    drawSprite,
+    keys,
+    keyCode,
+    time,
+    settings,
+    playSound,
+    removeEntity,
+    camera,
+    addEntity,
+    moveAndCheckForObstacles,
+    stopSound,
+    checkCollision
+} from '../engine/engine';
 
-export const ENTITY_TYPE_COIN = addEntityType('0', updateCoin, {
-  bbox: {
-    left: 0,
-    top: 0,
-    width: 1,
-    height: 1
-  }
-});
+import { ENTITY_TYPE_WALL, ENTITY_TYPE_MARIO } from '../entityTypes';
+import assets from '../assets';
+//#endregion
 
-function updateCoin(coin) {
-  // Код ниже выполняется каждый кадр
-  drawSprite(sprCoin, coin, 2 * time.deltaTime);
+export function updateCoin(coin) {
+    drawSprite(assets.sprCoin, coin, 0.05);
 }

@@ -1,13 +1,9 @@
-export const ENTITY_TYPE_WALL = addEntityType('#', updateWall, {
-  bbox: {
-    left: 0,
-    top: 0,
-    width: settings.tileSize,
-    height: settings.tileSize
-  }
-});
+//#region imports
+import { addEntityType, settings, drawSprite } from '../engine/engine';
+import assets from '../assets';
+//#endregion
 
-function updateWall(wall) {
-  // Весь код ниже выполняется каждый кадр
-  drawSprite(sprGroundBlock, wall);
+export function updateWall(wall) {
+    // Весь код ниже выполняется каждый кадр
+    drawSprite(assets.sprGroundBlock, wall);
 }

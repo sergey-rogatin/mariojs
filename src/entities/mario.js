@@ -1,68 +1,56 @@
-export const ENTITY_TYPE_MARIO = addEntityType('@', updateMario, {
-  bbox: {
-    left: -0.45,
-    top: -1,
-    width: 0.9,
-    height: 1
-  }
-});
+//#region imports
+import {
+    addEntityType,
+    drawSprite,
+    keys,
+    keyCode,
+    time,
+    settings,
+    playSound,
+    removeEntity,
+    camera,
+    addEntity,
+    moveAndCheckForObstacles,
+    stopSound,
+    checkCollision
+} from '../engine/engine';
+
+import { ENTITY_TYPE_WALL, ENTITY_TYPE_MARIO } from '../entityTypes';
+import assets from '../assets';
+//#endregion
 
 export function updateMario(mario) {
-  if (!mario.isInitialized) {
-    // Код в этом блоке выполняется только при создании объекта
-    mario.startX = mario.x;
-    mario.startY = mario.y;
+    const keyRight = keys[keyCode.ARROW_RIGHT];
+    const keyLeft = keys[keyCode.ARROW_LEFT];
+    const keyJump = keys[keyCode.SPACE];
 
-    mario.isInitialized = true;
-  }
+    if (keyLeft.isDown) {
+        mario.direction = -1;
+    }
+    if (keyRight.isDown) {
+        mario.direction = 1;
+    }
 
-  // Весь код ниже выполняется каждый кадр
-  const dir = mario.direction || 1;
-  const absSpeedX = Math.abs(mario.speedX);
+    if (!mario.isOnGround) {
+        drawSprite(assets.sprMarioJumping, mario, 0, mario.direction);
+    } else if (mario.speedX === 0) {
+        drawSprite(assets.sprMarioIdle, mario, 0, mario.direction);
+    } else {
+        drawSprite(assets.sprMarioRunning, mario, 0.2, mario.direction);
+    }
 
-  // Рисуем спрайт марио на экране
-  drawSprite(sprMarioIdle, mario, 0, dir);
+    mario.speedX = (keyRight.isDown - keyLeft.isDown) * 5;
+    mario.speedY += settings.gravity * time.deltaTime;
 
-  // Двигаемся, если игрок нажимает на клавиши
-  const keyLeft = keys[keyCode.ARROW_LEFT];
-  const keyRight = keys[keyCode.ARROW_RIGHT];
-  const keySpace = keys[keyCode.SPACE];
+    if (mario.isOnGround && keyJump.wentDown) {
+        playSound(assets.sndJump);
+        mario.speedY = -12;
+    }
 
-  const accelConst = 60;
-  const friction = 10;
+    const { horizWall, vertWall } = moveAndCheckForObstacles(mario, [
+        ENTITY_TYPE_WALL
+    ]);
+    mario.isOnGround = vertWall !== null;
 
-  const accelX = (keyRight.isDown - keyLeft.isDown) * accelConst;
-
-  if (keyRight.isDown) {
-    mario.direction = 1;
-  }
-  if (keyLeft.isDown) {
-    mario.direction = -1;
-  }
-
-  mario.speedX += accelX * time.deltaTime;
-  mario.speedY += settings.gravity * time.deltaTime;
-  mario.speedX *= 1 - friction * time.deltaTime;
-
-  const { vertWall } = moveAndCheckForObstacles(mario, [
-    ENTITY_TYPE_WALL,
-    ENTITY_TYPE_QUESTION_BLOCK
-  ]);
-  mario.isOnGround = Boolean(vertWall && vertWall.y <= mario.y);
-
-  // прыгаем
-  if (keySpace.wentDown && mario.isOnGround) {
-    mario.speedY = -12;
-    playSound(sndJump);
-  }
-
-  // Создаем марио заново, если он упал за пределы экрана
-  if (mario.y > 30) {
-    removeEntity(mario);
-    const newMario = addEntity(ENTITY_TYPE_MARIO);
-    newMario.x = mario.startX;
-    newMario.y = mario.startY;
-  }
-
-  camera.x = mario.x;
+    camera.x = mario.x;
 }
