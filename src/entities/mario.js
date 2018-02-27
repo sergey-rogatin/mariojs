@@ -20,5 +20,5 @@ import assets from '../assets';
 //#endregion
 
 export function updateMario(mario) {
-    drawSprite(assets.sprMarioIdle, mario, 0, mario.direction);
+    drawSprite(assets.sprMarioIdle, mario);
 }

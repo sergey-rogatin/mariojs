@@ -3,3 +3,4 @@ dist
 .cache
 .go-bundler-cache
 build
+.go-bundler-cache
