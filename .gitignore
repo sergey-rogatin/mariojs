@@ -3,3 +3,5 @@ dist
 .cache
 build
 .go-bundler-cache
+package-lock.json
+.parcel-cache

@@ -1,17 +1,18 @@
 import { loadSound, loadSprite } from './engine/engine';
 
-import audioMainTheme from './sounds/mainTheme.mp3';
-import imgCoin from './sprites/coin.png';
-import audioCoin from './sounds/coin.wav';
-import audioStomp from './sounds/stomp.wav';
-import audioGameOver from './sounds/gameOver.wav';
-import imgGoomba from './sprites/goomba.png';
-import audioJump from './sounds/jump.wav';
-import imgMarioRunning from './sprites/marioRunning.png';
-import imgMarioIdle from './sprites/marioIdle.png';
-import imgMarioJumping from './sprites/marioJumping.png';
-import imgQuestionBlock from './sprites/questionBlock.png';
-import imgGroundBlock from './sprites/groundBlock.png';
+import audioMainTheme from 'url:./sounds/mainTheme.mp3';
+import imgCoin from 'url:./sprites/coin.png';
+import audioCoin from 'url:./sounds/coin.wav';
+import audioStomp from 'url:./sounds/stomp.wav';
+import audioGameOver from 'url:./sounds/gameOver.wav';
+import audioJump from 'url:./sounds/jump.wav';
+
+import imgGoomba from 'url:./sprites/goomba.png';
+import imgMarioRunning from 'url:./sprites/marioRunning.png';
+import imgMarioIdle from 'url:./sprites/marioIdle.png';
+import imgMarioJumping from 'url:./sprites/marioJumping.png';
+import imgQuestionBlock from 'url:./sprites/questionBlock.png';
+import imgGroundBlock from 'url:./sprites/groundBlock.png';
 
 const assets = {
     sndMainTheme: loadSound(audioMainTheme),
